@@ -38,42 +38,97 @@ function SkeletonCard() {
 export default function BeatCarousel({ beats, loading, currentBeat, isPlaying, onPlay }: Props) {
   const [activeIdx, setActiveIdx] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const isScrolling = useRef(false);
 
-  const getCardWidth = useCallback(() => {
-    if (!scrollRef.current) return 300;
-    // 84vw card + 12px gap
-    return scrollRef.current.offsetWidth * 0.84 + 12;
-  }, []);
+  // Two separate flags: one for the programmatic scroll lock, one for the
+  // debounce timer during user-driven scroll.
+  const programmaticRef = useRef(false);
+  const lockTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  /**
+   * Compute the exact scrollLeft that centers card[idx] in the viewport.
+   * Uses real DOM positions — no formula that drifts with padding/gap.
+   */
+  const getTargetScroll = useCallback(
+    (idx: number): number => {
+      const container = scrollRef.current;
+      if (!container) return 0;
+      const card = container.children[idx] as HTMLElement | undefined;
+      if (!card) return 0;
+      // Center the card: scrollLeft = card.offsetLeft - (containerWidth - cardWidth) / 2
+      return card.offsetLeft - (container.clientWidth - card.offsetWidth) / 2;
+    },
+    []
+  );
+
+  /**
+   * Find which card center is closest to the current viewport center.
+   * Also uses real DOM positions — no formula that drifts.
+   */
+  const getClosestIdx = useCallback((): number => {
+    const container = scrollRef.current;
+    if (!container) return 0;
+    const viewCenter = container.scrollLeft + container.clientWidth / 2;
+    let closest = 0;
+    let closestDist = Infinity;
+    Array.from(container.children).forEach((child, i) => {
+      const el = child as HTMLElement;
+      const cardCenter = el.offsetLeft + el.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - viewCenter);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = i;
+      }
+    });
+    return Math.min(Math.max(0, closest), beats.length - 1);
+  }, [beats.length]);
+
+  // ── Programmatic scroll (buttons / arrows / external beat change) ─────────
 
   const scrollToIdx = useCallback(
     (idx: number) => {
-      const el = scrollRef.current;
-      if (!el) return;
+      const container = scrollRef.current;
+      if (!container) return;
       const clamped = Math.min(Math.max(0, idx), beats.length - 1);
-      isScrolling.current = true;
-      el.scrollTo({ left: clamped * getCardWidth(), behavior: "smooth" });
+      programmaticRef.current = true;
+      container.scrollTo({ left: getTargetScroll(clamped), behavior: "smooth" });
       setActiveIdx(clamped);
-      setTimeout(() => { isScrolling.current = false; }, 400);
+      // Release lock after smooth scroll finishes (~500 ms typical)
+      if (lockTimer.current) clearTimeout(lockTimer.current);
+      lockTimer.current = setTimeout(() => {
+        programmaticRef.current = false;
+      }, 600);
     },
-    [beats.length, getCardWidth]
+    [beats.length, getTargetScroll]
   );
 
-  const handleScroll = useCallback(() => {
-    if (!scrollRef.current || isScrolling.current) return;
-    const w = getCardWidth();
-    if (!w) return;
-    const idx = Math.round(scrollRef.current.scrollLeft / w);
-    setActiveIdx(Math.min(Math.max(0, idx), beats.length - 1));
-  }, [beats.length, getCardWidth]);
+  // ── User-driven scroll ────────────────────────────────────────────────────
 
-  // When currently playing beat changes externally (prev/next), scroll carousel to it
+  const handleScroll = useCallback(() => {
+    // Ignore scroll events we fired ourselves
+    if (programmaticRef.current) return;
+    setActiveIdx(getClosestIdx());
+  }, [getClosestIdx]);
+
+  // ── Sync carousel when the playing beat changes externally ────────────────
+
   useEffect(() => {
     if (!currentBeat) return;
     const idx = beats.findIndex((b) => b.id === currentBeat.id);
     if (idx >= 0 && idx !== activeIdx) scrollToIdx(idx);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentBeat?.id]);
+
+  // ── Cleanup ───────────────────────────────────────────────────────────────
+
+  useEffect(() => {
+    return () => {
+      if (lockTimer.current) clearTimeout(lockTimer.current);
+    };
+  }, []);
+
+  // ── Render ────────────────────────────────────────────────────────────────
 
   if (loading) {
     return (
@@ -104,6 +159,8 @@ export default function BeatCarousel({ beats, loading, currentBeat, isPlaying, o
           background: "linear-gradient(to right, transparent, rgba(5,5,8,0.85))",
           pointerEvents: "none",
           zIndex: 4,
+          opacity: activeIdx < beats.length - 1 ? 1 : 0,
+          transition: "opacity 0.3s",
         }}
       />
       <div
@@ -134,7 +191,11 @@ export default function BeatCarousel({ beats, loading, currentBeat, isPlaying, o
           WebkitOverflowScrolling: "touch",
           scrollbarWidth: "none",
           msOverflowStyle: "none",
-          padding: "8px 24px 12px",
+          // Use symmetric padding so the first/last card can center-snap correctly.
+          // Padding = (containerWidth - cardWidth) / 2 — but since we can't know
+          // containerWidth in CSS, we approximate: with 84% cards the side margin
+          // is 8% of container = ~8vw. Use 8vw padding on each side.
+          padding: "8px 8vw 12px",
           cursor: "grab",
         }}
       >
@@ -144,8 +205,9 @@ export default function BeatCarousel({ beats, loading, currentBeat, isPlaying, o
             <div
               key={beat.id}
               style={{
-                minWidth: "84%",
-                maxWidth: "84%",
+                // Use vw-based width so cards stay 84% of viewport regardless of container
+                minWidth: "84vw",
+                maxWidth: "84vw",
                 scrollSnapAlign: "center",
                 flexShrink: 0,
                 transform: isActive ? "scale(1)" : "scale(0.94)",
@@ -254,7 +316,6 @@ export default function BeatCarousel({ beats, loading, currentBeat, isPlaying, o
       >
         {beats.map((_, i) => {
           const isActive = i === activeIdx;
-          // Only show dots around current index (max 9 visible)
           const half = 4;
           if (beats.length > 9 && Math.abs(i - activeIdx) > half) return null;
           return (

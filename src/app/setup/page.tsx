@@ -1,4 +1,15 @@
+import { notFound } from "next/navigation";
+
+/**
+ * Setup wizard — only accessible when SETUP_ENABLED=1 is set in the environment.
+ * In production (Cloudflare Pages), this env var is NOT set, so the page returns 404.
+ * For local dev: add SETUP_ENABLED=1 to .env.local
+ */
 export default function SetupPage() {
+  if (process.env.SETUP_ENABLED !== "1") {
+    notFound();
+  }
+
   return (
     <html lang="es">
       <body
@@ -81,7 +92,7 @@ export default function SetupPage() {
           </h2>
           <p style={{ color: "#94A3B8" }}>
             Haz clic en el botón. Inicia sesión con la cuenta que tiene acceso a
-            la carpeta BEATS (<strong style={{ color: "#F1F5F9" }}>prodmvxii@gmail.com</strong>).
+            la carpeta BEATS.
           </p>
           <a
             href="/api/auth/url"

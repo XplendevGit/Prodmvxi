@@ -1,5 +1,16 @@
 # https://developers.cloudflare.com/workers/static-assets/headers
 # https://opennext.js.org/cloudflare/caching#static-assets-caching
+
+# ── Security headers (all routes) ────────────────────────────────────────────
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=63072000; includeSubDomains
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; media-src 'self' blob: https:; connect-src 'self' https://api.brevo.com https://core.prod.beatstars.net https://www.googleapis.com https://oauth2.googleapis.com https://fonts.googleapis.com https://fonts.gstatic.com; frame-src https://open.spotify.com; frame-ancestors 'none'; form-action 'self'; upgrade-insecure-requests
+
+# ── Cache headers ─────────────────────────────────────────────────────────────
 /_next/static/*
   Cache-Control: public,max-age=31536000,immutable
 

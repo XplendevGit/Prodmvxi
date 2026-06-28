@@ -434,6 +434,27 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
     }
 
+    // Input length limits — prevent oversized payloads and email-header injection
+    if (
+      name.length > 120 ||
+      phone.length > 30 ||
+      email.length > 254 ||
+      (message && message.length > 2000)
+    ) {
+      return NextResponse.json({ error: "Un campo excede el tamaño permitido." }, { status: 400 });
+    }
+
+    // Validate email format
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      return NextResponse.json({ error: "Formato de email inválido." }, { status: 400 });
+    }
+
+    // Validate interest is one of the known values (prevents injection into subject line)
+    const ALLOWED_INTERESTS = ["Comprar un beat", "Beat personalizado", "Licencia exclusiva", "Colaboración", "Otro"];
+    if (interest && !ALLOWED_INTERESTS.includes(interest)) {
+      return NextResponse.json({ error: "Categoría de interés inválida." }, { status: 400 });
+    }
+
     // ── Provider selection ────────────────────────────────────────────────
     // Priority: BREVO_API_KEY (no domain needed) → RESEND_API_KEY (needs domain)
     const brevoKey = process.env.BREVO_API_KEY;

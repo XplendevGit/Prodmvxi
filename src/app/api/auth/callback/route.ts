@@ -1,5 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
+/** Escape HTML entities — used on all user/external-controlled values before HTML interpolation */
+function he(s: unknown): string {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
   const error = req.nextUrl.searchParams.get("error");
@@ -7,7 +17,7 @@ export async function GET(req: NextRequest) {
   if (error) {
     return new NextResponse(
       `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px">
-        <h2 style="color:#EC4899">Error de Google: ${error}</h2>
+        <h2 style="color:#EC4899">Error de Google: ${he(error)}</h2>
         <p>Verifica que agregaste correctamente la URI en Google Cloud Console.</p>
       </body></html>`,
       { headers: { "content-type": "text/html" } }
@@ -45,7 +55,7 @@ export async function GET(req: NextRequest) {
       return new NextResponse(
         `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px">
           <h2 style="color:#EC4899">Error al intercambiar el código</h2>
-          <pre style="color:#94A3B8">${errText}</pre>
+          <pre style="color:#94A3B8">${he(errText)}</pre>
           <a href="/setup" style="color:#06B6D4">← Volver a Setup</a>
         </body></html>`,
         { headers: { "content-type": "text/html" } }
@@ -69,18 +79,29 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    // Escape the token for safe inline display (defense-in-depth: tokens are URL-safe but escape anyway)
+    const safeToken = he(refreshToken);
+
     return new NextResponse(
       `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px;max-width:800px;margin:0 auto">
         <h1 style="color:#A855F7;letter-spacing:3px">✅ CONECTADO EXITOSAMENTE</h1>
         <p style="color:#94A3B8">Copia este Refresh Token y agrégalo como variable de entorno en Cloudflare Pages</p>
         <div style="background:#0D0D1A;border:1px solid #8B5CF6;border-radius:8px;padding:20px;margin:20px 0">
           <p style="color:#94A3B8;font-size:12px;margin:0 0 8px 0">GOOGLE_REFRESH_TOKEN=</p>
-          <p id="token" style="color:#A855F7;word-break:break-all;font-size:13px;margin:0">${refreshToken}</p>
+          <p id="token" style="color:#A855F7;word-break:break-all;font-size:13px;margin:0">${safeToken}</p>
         </div>
-        <button onclick="navigator.clipboard.writeText('${refreshToken}').then(()=>this.textContent='✅ Copiado!')"
+        <button id="copyBtn"
           style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;border:none;padding:12px 24px;border-radius:8px;cursor:pointer;font-size:14px;font-weight:700;letter-spacing:1px">
           COPIAR REFRESH TOKEN
         </button>
+        <script>
+          document.getElementById('copyBtn').addEventListener('click', function() {
+            var token = document.getElementById('token').textContent;
+            navigator.clipboard.writeText(token).then(function() {
+              document.getElementById('copyBtn').textContent = '✅ Copiado!';
+            });
+          });
+        </script>
         <hr style="border-color:#1a1a2e;margin:30px 0"/>
         <h3 style="color:#06B6D4">Qué hacer ahora:</h3>
         <ol style="color:#94A3B8;line-height:2">
@@ -95,7 +116,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(
       `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px">
         <h2 style="color:#EC4899">Error al intercambiar el código</h2>
-        <pre style="color:#94A3B8">${String(err)}</pre>
+        <pre style="color:#94A3B8">${he(err)}</pre>
         <a href="/setup" style="color:#06B6D4">← Volver a Setup</a>
       </body></html>`,
       { headers: { "content-type": "text/html" } }
