@@ -1,5 +1,6 @@
-import { google } from "googleapis";
 import { NextRequest, NextResponse } from "next/server";
+
+export const runtime = "edge";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -26,15 +27,34 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.GOOGLE_CLIENT_ID!;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-
-  const oauth2Client = new google.auth.OAuth2(
-    clientId,
-    clientSecret,
-    "http://localhost:3000/api/auth/callback"
-  );
+  const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/auth/callback`;
 
   try {
-    const { tokens } = await oauth2Client.getToken(code);
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        code,
+        client_id: clientId,
+        client_secret: clientSecret,
+        redirect_uri: redirectUri,
+        grant_type: "authorization_code",
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      return new NextResponse(
+        `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px">
+          <h2 style="color:#EC4899">Error al intercambiar el código</h2>
+          <pre style="color:#94A3B8">${errText}</pre>
+          <a href="/setup" style="color:#06B6D4">← Volver a Setup</a>
+        </body></html>`,
+        { headers: { "content-type": "text/html" } }
+      );
+    }
+
+    const tokens = await res.json() as { refresh_token?: string; access_token?: string };
     const refreshToken = tokens.refresh_token;
 
     if (!refreshToken) {
@@ -54,7 +74,7 @@ export async function GET(req: NextRequest) {
     return new NextResponse(
       `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px;max-width:800px;margin:0 auto">
         <h1 style="color:#A855F7;letter-spacing:3px">✅ CONECTADO EXITOSAMENTE</h1>
-        <p style="color:#94A3B8">Copia este Refresh Token y pégalo en tu archivo <code style="color:#06B6D4">.env.local</code></p>
+        <p style="color:#94A3B8">Copia este Refresh Token y agrégalo como variable de entorno en Cloudflare Pages</p>
         <div style="background:#0D0D1A;border:1px solid #8B5CF6;border-radius:8px;padding:20px;margin:20px 0">
           <p style="color:#94A3B8;font-size:12px;margin:0 0 8px 0">GOOGLE_REFRESH_TOKEN=</p>
           <p id="token" style="color:#A855F7;word-break:break-all;font-size:13px;margin:0">${refreshToken}</p>
@@ -66,17 +86,14 @@ export async function GET(req: NextRequest) {
         <hr style="border-color:#1a1a2e;margin:30px 0"/>
         <h3 style="color:#06B6D4">Qué hacer ahora:</h3>
         <ol style="color:#94A3B8;line-height:2">
-          <li>Abre <code style="color:#F1F5F9">.env.local</code> en tu proyecto</li>
-          <li>Reemplaza <code style="color:#EC4899">PEGA_TU_REFRESH_TOKEN_AQUI</code> con el token de arriba</li>
-          <li>Guarda el archivo</li>
-          <li>Reinicia el servidor: <code style="color:#06B6D4">npm run dev</code></li>
-          <li>Visita <a href="/" style="color:#A855F7">localhost:3000</a> — tus beats de Drive aparecerán automáticamente</li>
+          <li>Ve a tu proyecto en Cloudflare Pages → Settings → Environment variables</li>
+          <li>Agrega <code style="color:#F1F5F9">GOOGLE_REFRESH_TOKEN</code> con el token de arriba</li>
+          <li>Redespliega el proyecto</li>
         </ol>
       </body></html>`,
       { headers: { "content-type": "text/html" } }
     );
   } catch (err) {
-    console.error("OAuth token exchange error:", err);
     return new NextResponse(
       `<html><body style="font-family:monospace;background:#050508;color:#F1F5F9;padding:40px">
         <h2 style="color:#EC4899">Error al intercambiar el código</h2>

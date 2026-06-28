@@ -1,5 +1,6 @@
-import { google } from "googleapis";
 import { NextResponse } from "next/server";
+
+export const runtime = "edge";
 
 const FOLDER_ID =
   process.env.GOOGLE_DRIVE_FOLDER_ID || "1s77i1a4EbVydfsBdZCO9bqZ6sEU3AOAe";
@@ -73,7 +74,51 @@ function demoResponse() {
   });
 }
 
-// ── BeatStars public GraphQL API (verified working, no auth required) ───────
+// ── Google Drive via REST API (fetch-based, Edge-compatible) ─────────────────
+async function getGoogleAccessToken(
+  clientId: string,
+  clientSecret: string,
+  refreshToken: string
+): Promise<string | null> {
+  try {
+    const res = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        refresh_token: refreshToken,
+        grant_type: "refresh_token",
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json() as { access_token?: string };
+    return data.access_token || null;
+  } catch {
+    return null;
+  }
+}
+
+async function getDriveFiles(accessToken: string, folderId: string): Promise<DriveFile[]> {
+  try {
+    const params = new URLSearchParams({
+      q: `'${folderId}' in parents and trashed = false`,
+      fields: "files(id,name,mimeType,size,createdTime,webViewLink)",
+      pageSize: "100",
+    });
+    const res = await fetch(
+      `https://www.googleapis.com/drive/v3/files?${params}`,
+      { headers: { Authorization: `Bearer ${accessToken}` } }
+    );
+    if (!res.ok) return [];
+    const data = await res.json() as { files?: DriveFile[] };
+    return data.files || [];
+  } catch {
+    return [];
+  }
+}
+
+// ── BeatStars public GraphQL API ─────────────────────────────────────────────
 const BEATSTARS_GRAPHQL = "https://core.prod.beatstars.net/graphql";
 
 interface BsBundle {
@@ -131,7 +176,6 @@ async function bsGraphql<T>(query: string, variables: Record<string, unknown>): 
         "User-Agent": "Mozilla/5.0",
       },
       body: JSON.stringify({ query, variables }),
-      next: { revalidate: 1800 },
     });
     if (!res.ok) return null;
     const json = await res.json();
@@ -144,7 +188,6 @@ async function bsGraphql<T>(query: string, variables: Record<string, unknown>): 
 const TRACKS_QUERY = `query($memberId:String!,$page:Int,$size:Int){profileTracks(memberId:$memberId,page:$page,size:$size){content{id title bundle{stream{url duration} hls{url duration} waveform{url}} metadata{tags bpm free} price seoMetadata{slug} artwork{sizes{mini small medium large}}}}}`;
 
 function mapTrack(t: BsTrack) {
-  // HLS (.m3u8) is the publicly streamable URL; the raw .wav is auth-protected (403)
   const hls = t.bundle?.hls?.url || null;
   if (!hls) return null;
   const tags = t.metadata?.tags || [];
@@ -156,7 +199,6 @@ function mapTrack(t: BsTrack) {
     genre: detectGenre(tags, t.title),
     tags,
     price: t.price != null ? `$${Number(t.price).toFixed(2)}` : "$24.99",
-    // streamUrl is HLS — the AudioPlayer uses hls.js to play it
     previewUrl: hls,
     streamUrl: hls,
     isHls: true,
@@ -184,7 +226,6 @@ async function getMemberId(): Promise<string | null> {
   return profile?.profileByUsername?.memberId || null;
 }
 
-// Single page (server-side pagination)
 async function beatstarsResponse(page: number, size: number): Promise<NextResponse | null> {
   const memberId = await getMemberId();
   if (!memberId) return null;
@@ -204,13 +245,12 @@ async function beatstarsResponse(page: number, size: number): Promise<NextRespon
   return NextResponse.json({ beats, page, hasMore, mode: "beatstars" });
 }
 
-// Whole catalog in one response (client filters + paginates locally)
 async function beatstarsResponseAll(): Promise<NextResponse | null> {
   const memberId = await getMemberId();
   if (!memberId) return null;
 
   const PAGE = 100;
-  const MAX_PAGES = 20; // safety cap → up to 2000 beats
+  const MAX_PAGES = 20;
   const all: BsTrack[] = [];
 
   for (let p = 0; p < MAX_PAGES; p++) {
@@ -220,7 +260,7 @@ async function beatstarsResponseAll(): Promise<NextResponse | null> {
     );
     const tracks = data?.profileTracks?.content || [];
     all.push(...tracks);
-    if (tracks.length < PAGE) break; // last page reached
+    if (tracks.length < PAGE) break;
   }
 
   if (all.length === 0) return null;
@@ -238,26 +278,14 @@ export async function GET(req: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const rawToken = process.env.GOOGLE_REFRESH_TOKEN || "";
-  // Detect placeholder values left by the setup guide
   const hasValidToken =
     rawToken.length > 20 && !rawToken.startsWith("PEGA_") && rawToken !== "tu_refresh_token_aqui";
 
-  // ── 1. Try Google Drive via OAuth (returns everything on page 0) ───────────
+  // ── 1. Try Google Drive via OAuth (fetch-based) ───────────────────────────
   if (clientId && clientSecret && hasValidToken) {
-    try {
-      const auth = new google.auth.OAuth2(clientId, clientSecret);
-      auth.setCredentials({ refresh_token: rawToken });
-
-      const drive = google.drive({ version: "v3", auth });
-
-      const res = await drive.files.list({
-        q: `'${FOLDER_ID}' in parents and trashed = false`,
-        fields: "files(id,name,mimeType,size,createdTime,webViewLink)",
-        pageSize: 100,
-      });
-
-      const files: DriveFile[] = res.data.files || [];
-
+    const accessToken = await getGoogleAccessToken(clientId, clientSecret, rawToken);
+    if (accessToken) {
+      const files = await getDriveFiles(accessToken, FOLDER_ID);
       const audioFiles = files.filter((f) => {
         const mime = f.mimeType || "";
         const name = (f.name || "").toLowerCase();
@@ -279,21 +307,15 @@ export async function GET(req: Request) {
             bpm,
             genre,
             price: "$24.99",
-            // previewUrl is the iframe embed — kept for reference only, NOT for <audio>
             previewUrl: `https://drive.google.com/file/d/${file.id}/preview`,
-            // streamUrl is the direct audio URL — use this for <audio src>
             streamUrl: `https://docs.google.com/uc?export=open&id=${file.id}`,
             viewUrl: file.webViewLink,
             isDemoMode: false,
             isBeatstarsMode: false,
           };
         });
-
-        // Drive returns the whole folder at once — no further pages
         return NextResponse.json({ beats, page: 0, hasMore: false, mode: "drive" });
       }
-    } catch (error) {
-      console.error("Drive OAuth error:", error);
     }
   }
 
