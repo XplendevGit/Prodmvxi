@@ -125,6 +125,7 @@ export default function Footer() {
                 { label: "Todos los beats", href: "/beats" },
                 { label: "Licencias", href: "/#licencias" },
                 { label: "Contacto", href: "/#contacto-form" },
+                { label: "Términos y Condiciones", href: "/terminos" },
               ].map((l) => (
                 <a
                   key={l.href}

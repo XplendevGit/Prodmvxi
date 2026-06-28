@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import BeatCard from "./BeatCard";
+import BeatCarousel from "./BeatCarousel";
 import AudioPlayer from "./AudioPlayer";
 import WhatsAppFloat from "./WhatsAppFloat";
 import { Beat, beatMatchesStyle } from "@/lib/beatFilters";
@@ -43,6 +44,15 @@ export default function BeatGrid() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [isBeatstarsMode, setIsBeatstarsMode] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   // Load the full catalog once (cached) so we can split Old School vs general
   useEffect(() => {
@@ -76,28 +86,41 @@ export default function BeatGrid() {
     }
   };
 
-  const renderGrid = (list: Beat[]) => (
-    <div
-      style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-        gap: "20px",
-      }}
-    >
-      {loading
-        ? Array.from({ length: TEASER_SIZE }, (_, i) => <SkeletonCard key={i} />)
-        : list.slice(0, TEASER_SIZE).map((beat, index) => (
-            <BeatCard
-              key={beat.id}
-              beat={beat}
-              index={index}
-              isPlaying={isPlaying}
-              isActive={currentBeat?.id === beat.id}
-              onPlay={handlePlay}
-            />
-          ))}
-    </div>
-  );
+  const renderGrid = (list: Beat[]) => {
+    if (isMobile) {
+      return (
+        <BeatCarousel
+          beats={list.slice(0, TEASER_SIZE)}
+          loading={loading}
+          currentBeat={currentBeat}
+          isPlaying={isPlaying}
+          onPlay={handlePlay}
+        />
+      );
+    }
+    return (
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+          gap: "20px",
+        }}
+      >
+        {loading
+          ? Array.from({ length: TEASER_SIZE }, (_, i) => <SkeletonCard key={i} />)
+          : list.slice(0, TEASER_SIZE).map((beat, index) => (
+              <BeatCard
+                key={beat.id}
+                beat={beat}
+                index={index}
+                isPlaying={isPlaying}
+                isActive={currentBeat?.id === beat.id}
+                onPlay={handlePlay}
+              />
+            ))}
+      </div>
+    );
+  };
 
   const VerTodos = ({ href, label }: { href: string; label: string }) => (
     <div style={{ textAlign: "center", marginTop: "40px" }}>
@@ -131,7 +154,7 @@ export default function BeatGrid() {
     >
       {/* ===== Section header ===== */}
       <div style={{ textAlign: "center", marginBottom: "40px" }}>
-        <h2 style={{ fontSize: "clamp(32px, 6vw, 60px)", fontWeight: 900, letterSpacing: "4px", color: "#F1F5F9", margin: "0 0 12px 0", textTransform: "uppercase" }}>
+        <h2 className="glitch-text" data-text="MIS BEATS" style={{ fontSize: "clamp(32px, 6vw, 60px)", fontWeight: 900, letterSpacing: "4px", color: "#F1F5F9", margin: "0 0 12px 0", textTransform: "uppercase" }}>
           MIS <span style={{ color: "#A855F7", textShadow: "0 0 30px rgba(168,85,247,0.6)" }}>BEATS</span>
         </h2>
         <div style={{ width: "80px", height: "3px", background: "linear-gradient(90deg, #8B5CF6, #06B6D4)", margin: "0 auto 16px", borderRadius: "3px", boxShadow: "0 0 15px rgba(139,92,246,0.6)" }} />

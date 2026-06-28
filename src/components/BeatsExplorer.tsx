@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
 import { Search, X, SlidersHorizontal, ArrowLeft, Music2, ArrowUpDown, ChevronDown, Check } from "lucide-react";
 import BeatCard from "./BeatCard";
+import BeatCarousel from "./BeatCarousel";
 import AudioPlayer from "./AudioPlayer";
 import WhatsAppFloat from "./WhatsAppFloat";
 import Vinyl from "./Vinyl";
@@ -106,6 +107,15 @@ export default function BeatsExplorer() {
 
   const [currentBeat, setCurrentBeat] = useState<Beat | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   useEffect(() => {
     // Pre-select genre (?g=) or style (?style=) when arriving from the home links
@@ -274,6 +284,8 @@ export default function BeatsExplorer() {
             CATÁLOGO COMPLETO
           </div>
           <h1
+            className="glitch-text"
+            data-text="TODOS LOS BEATS"
             style={{
               fontSize: "clamp(40px, 8vw, 84px)",
               fontWeight: 900,
@@ -559,23 +571,33 @@ export default function BeatsExplorer() {
           </div>
         )}
 
-        {/* Grid */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: "20px" }}>
-          {loading
-            ? Array.from({ length: 12 }, (_, i) => (
-                <div key={i} className="skeleton" style={{ height: "260px", borderRadius: "16px" }} />
-              ))
-            : visible.map((beat, index) => (
-                <BeatCard
-                  key={beat.id}
-                  beat={beat}
-                  index={index}
-                  isPlaying={isPlaying}
-                  isActive={currentBeat?.id === beat.id}
-                  onPlay={handlePlay}
-                />
-              ))}
-        </div>
+        {/* Grid / Carousel */}
+        {isMobile ? (
+          <BeatCarousel
+            beats={visible}
+            loading={loading}
+            currentBeat={currentBeat}
+            isPlaying={isPlaying}
+            onPlay={handlePlay}
+          />
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: "20px" }}>
+            {loading
+              ? Array.from({ length: 12 }, (_, i) => (
+                  <div key={i} className="skeleton" style={{ height: "260px", borderRadius: "16px" }} />
+                ))
+              : visible.map((beat, index) => (
+                  <BeatCard
+                    key={beat.id}
+                    beat={beat}
+                    index={index}
+                    isPlaying={isPlaying}
+                    isActive={currentBeat?.id === beat.id}
+                    onPlay={handlePlay}
+                  />
+                ))}
+          </div>
+        )}
 
         {/* Empty */}
         {!loading && filtered.length === 0 && (

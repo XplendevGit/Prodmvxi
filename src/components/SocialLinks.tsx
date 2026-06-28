@@ -246,6 +246,8 @@ export default function SocialLinks() {
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "64px" }}>
           <h2
+            className="glitch-text"
+            data-text="SÍGUEME"
             style={{
               fontSize: "clamp(32px, 6vw, 64px)",
               fontWeight: 900,
@@ -255,15 +257,7 @@ export default function SocialLinks() {
               textTransform: "uppercase",
             }}
           >
-            SÍ
-            <span
-              style={{
-                color: "#A855F7",
-                textShadow: "0 0 30px rgba(168,85,247,0.6)",
-              }}
-            >
-              GUEME
-            </span>
+            SÍ<span style={{ color: "#A855F7", textShadow: "0 0 30px rgba(168,85,247,0.6)" }}>GUEME</span>
           </h2>
           <div
             style={{

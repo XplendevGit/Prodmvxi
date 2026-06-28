@@ -135,6 +135,8 @@ export default function ContactForm() {
             HABLEMOS
           </span>
           <h2
+            className="glitch-text"
+            data-text="CONTÁCTAME"
             style={{
               fontSize: "clamp(30px, 5vw, 52px)",
               fontWeight: 900,
