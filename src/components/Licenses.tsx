@@ -108,23 +108,6 @@ export default function Licenses() {
       <div style={{ maxWidth: "1280px", margin: "0 auto", position: "relative" }}>
         {/* Header */}
         <div style={{ textAlign: "center", marginBottom: "70px" }}>
-          <span
-            style={{
-              display: "inline-block",
-              padding: "6px 20px",
-              borderRadius: "50px",
-              background: "rgba(139,92,246,0.15)",
-              border: "1px solid rgba(139,92,246,0.3)",
-              color: "#A855F7",
-              fontSize: "11px",
-              fontWeight: 700,
-              letterSpacing: "3px",
-              marginBottom: "20px",
-            }}
-          >
-            BEATSTARS LICENSING
-          </span>
-
           <h2
             className="glitch-text"
             data-text="LICENCIAS"

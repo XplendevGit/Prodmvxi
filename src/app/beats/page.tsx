@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import BeatsExplorer from "@/components/BeatsExplorer";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "Todos los Beats | Prod. Mvxii",
@@ -8,5 +9,10 @@ export const metadata: Metadata = {
 };
 
 export default function BeatsPage() {
-  return <BeatsExplorer />;
+  return (
+    <>
+      <BeatsExplorer />
+      <Footer />
+    </>
+  );
 }

@@ -131,42 +131,6 @@ export default function BeatGrid() {
     >
       {/* ===== Section header ===== */}
       <div style={{ textAlign: "center", marginBottom: "40px" }}>
-        {isBeatstarsMode && (
-          <div
-            style={{
-              display: "inline-block",
-              padding: "6px 16px",
-              borderRadius: "50px",
-              background: "rgba(168,85,247,0.15)",
-              border: "1px solid rgba(168,85,247,0.3)",
-              color: "#A855F7",
-              fontSize: "12px",
-              fontWeight: 600,
-              letterSpacing: "2px",
-              marginBottom: "16px",
-            }}
-          >
-            BEATS DESDE BEATSTARS — Para conectar Drive agrega GOOGLE_REFRESH_TOKEN en .env.local
-          </div>
-        )}
-        {isDemoMode && !isBeatstarsMode && (
-          <div
-            style={{
-              display: "inline-block",
-              padding: "6px 16px",
-              borderRadius: "50px",
-              background: "rgba(236,72,153,0.15)",
-              border: "1px solid rgba(236,72,153,0.3)",
-              color: "#EC4899",
-              fontSize: "12px",
-              fontWeight: 600,
-              letterSpacing: "2px",
-              marginBottom: "16px",
-            }}
-          >
-            MODO DEMO — Agrega GOOGLE_REFRESH_TOKEN en .env.local para ver los beats reales
-          </div>
-        )}
         <h2 style={{ fontSize: "clamp(32px, 6vw, 60px)", fontWeight: 900, letterSpacing: "4px", color: "#F1F5F9", margin: "0 0 12px 0", textTransform: "uppercase" }}>
           MIS <span style={{ color: "#A855F7", textShadow: "0 0 30px rgba(168,85,247,0.6)" }}>BEATS</span>
         </h2>
