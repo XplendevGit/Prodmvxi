@@ -109,8 +109,10 @@ export default function BeatsExplorer() {
   const [currentBeat, setCurrentBeat] = useState<Beat | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(mq.matches);
     update();
@@ -574,7 +576,7 @@ export default function BeatsExplorer() {
         )}
 
         {/* Grid / Carousel */}
-        {isMobile ? (
+        {mounted && isMobile ? (
           <BeatCarousel
             beats={visible}
             loading={loading}

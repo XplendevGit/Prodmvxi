@@ -95,7 +95,10 @@ export default function BeatCard({ beat, index, isPlaying, isActive, onPlay }: B
             <img
               src={beat.artwork}
               alt={beat.name}
+              width={400}
+              height={400}
               loading="lazy"
+              decoding="async"
               style={{
                 width: "100%",
                 height: "100%",

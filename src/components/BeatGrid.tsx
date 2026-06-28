@@ -46,8 +46,10 @@ export default function BeatGrid() {
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [isBeatstarsMode, setIsBeatstarsMode] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
     const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobile(mq.matches);
     update();
@@ -89,7 +91,7 @@ export default function BeatGrid() {
   };
 
   const renderGrid = (list: Beat[]) => {
-    if (isMobile) {
+    if (mounted && isMobile) {
       return (
         <BeatCarousel
           beats={list.slice(0, TEASER_SIZE)}

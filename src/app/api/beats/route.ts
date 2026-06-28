@@ -57,19 +57,26 @@ const DEMO_BEATS = [
   { id: "demo8", name: "Boom Bap Gold", bpm: "92", genre: "Boom Bap", price: "$24.99" },
 ];
 
+const CACHE_HEADERS = {
+  "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+};
+
 function demoResponse() {
-  return NextResponse.json({
-    beats: DEMO_BEATS.map((b) => ({
-      ...b,
-      previewUrl: null,
-      streamUrl: null,
-      isDemoMode: true,
-      isBeatstarsMode: false,
-    })),
-    page: 0,
-    hasMore: false,
-    mode: "demo",
-  });
+  return NextResponse.json(
+    {
+      beats: DEMO_BEATS.map((b) => ({
+        ...b,
+        previewUrl: null,
+        streamUrl: null,
+        isDemoMode: true,
+        isBeatstarsMode: false,
+      })),
+      page: 0,
+      hasMore: false,
+      mode: "demo",
+    },
+    { headers: CACHE_HEADERS }
+  );
 }
 
 // ── Google Drive via REST API (fetch-based, Edge-compatible) ─────────────────
@@ -240,7 +247,7 @@ async function beatstarsResponse(page: number, size: number): Promise<NextRespon
   const beats = tracks.map(mapTrack).filter(Boolean);
   const hasMore = tracks.length === size;
 
-  return NextResponse.json({ beats, page, hasMore, mode: "beatstars" });
+  return NextResponse.json({ beats, page, hasMore, mode: "beatstars" }, { headers: CACHE_HEADERS });
 }
 
 async function beatstarsResponseAll(): Promise<NextResponse | null> {
@@ -264,7 +271,10 @@ async function beatstarsResponseAll(): Promise<NextResponse | null> {
   if (all.length === 0) return null;
 
   const beats = all.map(mapTrack).filter(Boolean);
-  return NextResponse.json({ beats, total: beats.length, hasMore: false, mode: "beatstars" });
+  return NextResponse.json(
+    { beats, total: beats.length, hasMore: false, mode: "beatstars" },
+    { headers: CACHE_HEADERS }
+  );
 }
 
 export async function GET(req: Request) {

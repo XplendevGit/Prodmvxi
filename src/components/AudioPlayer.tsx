@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import Hls from "hls.js";
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from "lucide-react";
 
 interface Beat {
@@ -101,7 +100,8 @@ export default function AudioPlayer({
   const [showVol, setShowVol] = useState(false);
 
   const audioRef = useRef<HTMLAudioElement>(null);
-  const hlsRef = useRef<Hls | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const hlsRef = useRef<any>(null);
   const isPlayingRef = useRef(isPlaying);
   const waveRef = useRef<HTMLDivElement>(null);
   isPlayingRef.current = isPlaying;
@@ -168,14 +168,20 @@ export default function AudioPlayer({
     const isHls = currentBeat.isHls || src.endsWith(".m3u8");
     if (src && isHls) {
       if (audio.canPlayType("application/vnd.apple.mpegurl")) {
+        // Safari — native HLS, no library needed
         audio.src = src; audio.load();
-      } else if (Hls.isSupported()) {
-        const hls = new Hls();
-        hls.loadSource(src); hls.attachMedia(audio);
-        hls.on(Hls.Events.MANIFEST_PARSED, () => {
-          if (isPlayingRef.current) audio.play().catch(() => {});
+      } else {
+        // Dynamic import: hls.js (~280 KB) only downloads when actually needed
+        import("hls.js").then(({ default: Hls }) => {
+          if (!Hls.isSupported()) return;
+          const hls = new Hls({ maxBufferLength: 30 });
+          hls.loadSource(src);
+          hls.attachMedia(audio);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => {
+            if (isPlayingRef.current) audio.play().catch(() => {});
+          });
+          hlsRef.current = hls;
         });
-        hlsRef.current = hls;
       }
     } else if (src) {
       audio.src = src; audio.load();
@@ -474,6 +480,8 @@ export default function AudioPlayer({
                   <img
                     src={currentBeat.artwork}
                     alt={currentBeat.name}
+                    width={44}
+                    height={44}
                     style={{ width: "100%", height: "100%", objectFit: "cover" }}
                   />
                   {isPlaying && (

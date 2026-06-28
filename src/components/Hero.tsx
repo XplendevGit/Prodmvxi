@@ -3,8 +3,9 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 
-const EQUALIZER_BARS = Array.from({ length: 20 }, (_, i) => i);
-const PARTICLE_COUNT = 25;
+// Reduced from 20→8 bars and 25→8 particles: fewer animated DOM nodes during LCP
+const EQUALIZER_BARS = Array.from({ length: 8 }, (_, i) => i);
+const PARTICLE_COUNT = 8;
 
 interface Particle {
   id: number;
@@ -18,14 +19,14 @@ interface Particle {
 const PARTICLES: Particle[] = Array.from({ length: PARTICLE_COUNT }, (_, i) => ({
   id: i,
   left: (i / PARTICLE_COUNT) * 100,
-  delay: (i * 0.37) % 6,
-  duration: 6 + (i % 5),
+  delay: (i * 0.9) % 6,
+  duration: 7 + (i % 4),
   size: 2 + (i % 4),
   color: i % 3 === 0 ? "#8B5CF6" : i % 3 === 1 ? "#06B6D4" : "#EC4899",
 }));
 
-const EQ_DELAYS = [0, 80, 160, 40, 200, 120, 280, 60, 340, 100, 220, 180, 260, 20, 300, 140, 380, 240, 320, 400];
-const EQ_ANIMS = ["equalizer", "equalizerB", "equalizerC", "equalizer", "equalizerB", "equalizerC", "equalizer", "equalizerB", "equalizerC", "equalizer", "equalizerC", "equalizerB", "equalizer", "equalizerC", "equalizerB", "equalizer", "equalizerC", "equalizerB", "equalizer", "equalizerC"];
+const EQ_DELAYS = [0, 120, 240, 60, 300, 180, 80, 200];
+const EQ_ANIMS  = ["equalizer", "equalizerB", "equalizerC", "equalizer", "equalizerB", "equalizerC", "equalizer", "equalizerB"];
 
 export default function Hero() {
   const scrollToBeats = () => {
@@ -132,6 +133,8 @@ export default function Hero() {
               alt="Prod. Mvxii"
               width={130}
               height={130}
+              priority
+              fetchPriority="high"
               style={{
                 borderRadius: "50%",
                 border: "4px solid #050508",
