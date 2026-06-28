@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Menu, X, ShoppingCart } from "lucide-react";
+import { WA_CONTACT_URL } from "@/lib/whatsapp";
 
 export default function Navigation() {
   const [scrolled, setScrolled] = useState(false);
@@ -17,13 +18,17 @@ export default function Navigation() {
   const navLinks = [
     { label: "Beats", href: "#beats" },
     { label: "Licencias", href: "#licencias" },
-    { label: "Contacto", href: "#contacto" },
   ];
 
   const scrollTo = (href: string) => {
     setMenuOpen(false);
     const el = document.querySelector(href);
     if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const openWhatsApp = () => {
+    setMenuOpen(false);
+    window.open(WA_CONTACT_URL, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -84,6 +89,26 @@ export default function Navigation() {
                 {link.label}
               </button>
             ))}
+
+            <button
+              onClick={openWhatsApp}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#25D366",
+                fontSize: "14px",
+                fontWeight: 600,
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                padding: "4px 0",
+                transition: "color 0.2s",
+              }}
+              onMouseEnter={(e) => { (e.target as HTMLButtonElement).style.color = "#128C7E"; }}
+              onMouseLeave={(e) => { (e.target as HTMLButtonElement).style.color = "#25D366"; }}
+            >
+              Contacto
+            </button>
 
             <a
               href="https://www.beatstars.com/prodmvxii"
@@ -168,6 +193,22 @@ export default function Navigation() {
               {link.label}
             </button>
           ))}
+          <button
+            onClick={openWhatsApp}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "#25D366",
+              fontSize: "16px",
+              fontWeight: 600,
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              textAlign: "left",
+            }}
+          >
+            Contacto (WhatsApp)
+          </button>
           <a
             href="https://www.beatstars.com/prodmvxii"
             target="_blank"

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search, X, SlidersHorizontal, ArrowLeft, Music2, ArrowUpDown, ChevronDown, Check } from "lucide-react";
 import BeatCard from "./BeatCard";
 import AudioPlayer from "./AudioPlayer";
+import WhatsAppFloat from "./WhatsAppFloat";
 import Vinyl from "./Vinyl";
 import {
   Beat,
@@ -119,7 +120,12 @@ export default function BeatsExplorer() {
     fetch(`/api/beats?all=1`)
       .then((r) => r.json())
       .then((data) => {
-        setBeats(data.beats ?? []);
+        const list = data.beats ?? [];
+        setBeats(list);
+        if (list.length > 0) {
+          setCurrentBeat(list[0]);
+          setIsPlaying(true);
+        }
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -622,6 +628,7 @@ export default function BeatsExplorer() {
           setIsPlaying(true);
         }}
       />
+      <WhatsAppFloat playerActive={!!currentBeat} />
     </div>
   );
 }

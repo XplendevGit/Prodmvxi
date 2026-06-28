@@ -15,7 +15,7 @@ function IgGlyph({ size = 18 }: { size?: number }) {
 
 // ⚠️ CAMBIA ESTE NÚMERO por el WhatsApp real de Maxi (formato internacional, solo dígitos)
 // Ej: Chile +56 9 1234 5678  →  "56912345678"
-const WHATSAPP_NUMBER = "56912345678";
+const WHATSAPP_NUMBER = "56932907119";
 const INSTAGRAM_USER = "prodmvxii";
 
 const INTERESTS = ["Comprar un beat", "Beat personalizado", "Licencia exclusiva", "Colaboración", "Otro"];

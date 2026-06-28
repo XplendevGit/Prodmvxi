@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import BeatCard from "./BeatCard";
 import AudioPlayer from "./AudioPlayer";
+import WhatsAppFloat from "./WhatsAppFloat";
 import { Beat, beatMatchesStyle } from "@/lib/beatFilters";
 
 interface BeatsResponse {
@@ -48,9 +49,14 @@ export default function BeatGrid() {
     fetch(`/api/beats?all=1`)
       .then((r) => r.json())
       .then((data: BeatsResponse) => {
-        setBeats(data.beats ?? []);
+        const list = data.beats ?? [];
+        setBeats(list);
         setIsDemoMode(data.mode === "demo");
         setIsBeatstarsMode(data.mode === "beatstars");
+        if (list.length > 0) {
+          setCurrentBeat(list[0]);
+          setIsPlaying(true);
+        }
         setLoading(false);
       })
       .catch(() => {
@@ -166,6 +172,31 @@ export default function BeatGrid() {
         </h2>
         <div style={{ width: "80px", height: "3px", background: "linear-gradient(90deg, #8B5CF6, #06B6D4)", margin: "0 auto 16px", borderRadius: "3px", boxShadow: "0 0 15px rgba(139,92,246,0.6)" }} />
         <p style={{ color: "rgba(241,245,249,0.5)", fontSize: "14px", letterSpacing: "1px" }}>Una probada del catálogo — dale PLAY para escuchar</p>
+
+        {currentBeat && (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px", marginTop: "16px" }}>
+            <div style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "10px",
+              padding: "8px 20px",
+              borderRadius: "50px",
+              background: "rgba(168,85,247,0.12)",
+              border: "1px solid rgba(168,85,247,0.35)",
+              color: "#A855F7",
+              fontSize: "12px",
+              fontWeight: 700,
+              letterSpacing: "2px",
+            }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                {[1, 2, 3].map((i) => (
+                  <span key={i} style={{ display: "inline-block", width: "3px", height: `${6 + i * 3}px`, background: "#A855F7", borderRadius: "2px", animation: `waveBar 0.6s ${i * 120}ms ease-in-out infinite` }} />
+                ))}
+              </span>
+              SONANDO: {currentBeat.name}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Quick genre links → full explorer */}
@@ -261,6 +292,7 @@ export default function BeatGrid() {
           setIsPlaying(true);
         }}
       />
+      <WhatsAppFloat playerActive={!!currentBeat} />
     </section>
   );
 }
