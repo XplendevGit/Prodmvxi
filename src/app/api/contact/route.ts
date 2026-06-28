@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "edge";
 
 const TO_EMAIL = "prodmvxi@gmail.com";
+// Brevo (Sendinblue) transactional email API — free 300/day, no domain needed
+const BREVO_URL = "https://api.brevo.com/v3/smtp/email";
 
 /** Escape HTML entities to prevent template injection */
 function esc(s: string): string {
@@ -432,61 +434,91 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Faltan campos obligatorios." }, { status: 400 });
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      console.warn("[contact] RESEND_API_KEY not set — email not sent");
+    // ── Provider selection ────────────────────────────────────────────────
+    // Priority: BREVO_API_KEY (no domain needed) → RESEND_API_KEY (needs domain)
+    const brevoKey = process.env.BREVO_API_KEY;
+    const resendKey = process.env.RESEND_API_KEY;
+
+    if (!brevoKey && !resendKey) {
+      console.warn("[contact] No email API key configured — email not sent");
       return NextResponse.json({ ok: true, warn: "email_not_configured" });
     }
 
-    const fromEmail =
-      process.env.RESEND_FROM_EMAIL ?? "Prod. Mvxii <onboarding@resend.dev>";
-
     const html = buildHtml({ name, phone, email, interest, message: message ?? "" });
-
-    let resendStatus = 0;
-    let resendBody = "";
+    const subject = `🎵 Nuevo contacto: ${name} — ${interest}`;
 
     try {
-      const resendRes = await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          from: fromEmail,
-          to: [TO_EMAIL],
-          reply_to: email,
-          subject: `🎵 Nuevo contacto: ${name} — ${interest}`,
-          html,
-        }),
-      });
+      if (brevoKey) {
+        // ── Brevo (Sendinblue) ─────────────────────────────────────────────
+        // Free 300 emails/day. Sender must be verified in Brevo dashboard
+        // (Settings → Senders → Add email → verify via Gmail).
+        const senderEmail = process.env.BREVO_SENDER_EMAIL ?? TO_EMAIL;
 
-      resendStatus = resendRes.status;
-      resendBody = await resendRes.text();
-
-      if (!resendRes.ok) {
-        console.error(`[contact] Resend ${resendStatus}:`, resendBody);
-
-        const isDomainIssue =
-          resendStatus === 403 ||
-          resendBody.includes("domain") ||
-          resendBody.includes("sender") ||
-          resendBody.includes("from") ||
-          resendBody.includes("testing");
-
-        return NextResponse.json(
-          {
-            error: isDomainIssue
-              ? "El email destino no está verificado en Resend. Sigue los pasos en CLAUDE.md para activarlo."
-              : `Error al enviar (Resend ${resendStatus}).`,
-            resend_detail: resendBody,
+        const res = await fetch(BREVO_URL, {
+          method: "POST",
+          headers: {
+            "api-key": brevoKey,
+            "Content-Type": "application/json",
+            Accept: "application/json",
           },
-          { status: 502 }
-        );
+          body: JSON.stringify({
+            sender: { name: "Prod. Mvxii Website", email: senderEmail },
+            to: [{ email: TO_EMAIL, name: "Prod. Mvxii" }],
+            replyTo: { email, name },
+            subject,
+            htmlContent: html,
+          }),
+        });
+
+        const status = res.status;
+        const txt = await res.text();
+
+        if (!res.ok) {
+          console.error(`[contact] Brevo ${status}:`, txt);
+          return NextResponse.json(
+            {
+              error: `Error al enviar el email (Brevo ${status}). Verifica que el sender esté aprobado en brevo.com → Senders.`,
+              detail: txt,
+            },
+            { status: 502 }
+          );
+        }
+      } else if (resendKey) {
+        // ── Resend (fallback, requires verified domain) ────────────────────
+        const fromEmail =
+          process.env.RESEND_FROM_EMAIL ?? "Prod. Mvxii <onboarding@resend.dev>";
+
+        const res = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${resendKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: fromEmail,
+            to: [TO_EMAIL],
+            reply_to: email,
+            subject,
+            html,
+          }),
+        });
+
+        const status = res.status;
+        const txt = await res.text();
+
+        if (!res.ok) {
+          console.error(`[contact] Resend ${status}:`, txt);
+          return NextResponse.json(
+            {
+              error: `Error al enviar el email (Resend ${status}). Verifica el dominio sender en resend.com/domains.`,
+              detail: txt,
+            },
+            { status: 502 }
+          );
+        }
       }
     } catch (fetchErr) {
-      console.error("[contact] fetch to Resend failed:", fetchErr);
+      console.error("[contact] fetch to email provider failed:", fetchErr);
       return NextResponse.json(
         { error: "No se pudo conectar con el servicio de email." },
         { status: 502 }
