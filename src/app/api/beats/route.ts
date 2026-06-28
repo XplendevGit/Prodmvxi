@@ -1,7 +1,5 @@
 import { NextResponse } from "next/server";
 
-export const runtime = "edge";
-
 const FOLDER_ID =
   process.env.GOOGLE_DRIVE_FOLDER_ID || "1s77i1a4EbVydfsBdZCO9bqZ6sEU3AOAe";
 const BEATSTARS_USER = "prodmvxii";
