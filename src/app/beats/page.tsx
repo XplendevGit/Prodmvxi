@@ -1,0 +1,12 @@
+import type { Metadata } from "next";
+import BeatsExplorer from "@/components/BeatsExplorer";
+
+export const metadata: Metadata = {
+  title: "Todos los Beats | Prod. Mvxii",
+  description:
+    "Catálogo completo de beats de Prod. Mvxii. Filtra por género, estilo, artista (type beat) y BPM. Reggaeton, Trap, Old School y más.",
+};
+
+export default function BeatsPage() {
+  return <BeatsExplorer />;
+}
