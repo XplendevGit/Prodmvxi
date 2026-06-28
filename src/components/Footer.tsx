@@ -45,7 +45,7 @@ export default function Footer() {
       style={{
         background: "#030305",
         borderTop: "1px solid rgba(139,92,246,0.15)",
-        padding: "64px 24px 32px",
+        padding: "64px 24px 160px",
       }}
     >
       <div style={{ maxWidth: "1280px", margin: "0 auto" }}>
@@ -221,7 +221,7 @@ export default function Footer() {
           }}
         >
           <p style={{ color: "rgba(241,245,249,0.25)", fontSize: "12px", margin: 0 }}>
-            © 2025 Prod. Mvxii · Todos los derechos reservados
+            © 2026 Prod. Mvxii · Todos los derechos reservados
           </p>
           <div style={{ display: "flex", gap: "24px" }}>
             <Link
@@ -240,6 +240,56 @@ export default function Footer() {
             >
               Privacidad
             </a>
+          </div>
+        </div>
+
+        {/* Credits */}
+        <div
+          style={{
+            marginTop: "28px",
+            paddingTop: "20px",
+            borderTop: "1px solid rgba(139,92,246,0.07)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <p style={{ fontSize: "10px", color: "rgba(241,245,249,0.18)", letterSpacing: "2px", textTransform: "uppercase", margin: 0 }}>
+            Desarrollado por
+          </p>
+          <div style={{ display: "flex", alignItems: "center", gap: "14px" }}>
+            <a
+              href="https://xplendev.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ fontWeight: 800, fontSize: "13px", letterSpacing: "3px", color: "rgba(6,182,212,0.55)", textDecoration: "none", textTransform: "uppercase", transition: "color 0.2s" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "#06B6D4"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLAnchorElement).style.color = "rgba(6,182,212,0.55)"; }}
+            >
+              XPLENDEV
+            </a>
+            <span
+              style={{
+                fontSize: "18px",
+                color: "rgba(139,92,246,0.4)",
+                fontWeight: 900,
+                lineHeight: 1,
+              }}
+            >
+              ×
+            </span>
+            <span
+              style={{
+                fontWeight: 800,
+                fontSize: "13px",
+                letterSpacing: "3px",
+                color: "rgba(168,85,247,0.55)",
+                textTransform: "uppercase",
+              }}
+            >
+              PROD. MVXII
+            </span>
           </div>
         </div>
       </div>

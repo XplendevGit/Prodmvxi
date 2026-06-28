@@ -64,8 +64,9 @@ export default function BeatGrid() {
         setIsDemoMode(data.mode === "demo");
         setIsBeatstarsMode(data.mode === "beatstars");
         if (list.length > 0) {
-          setCurrentBeat(list[0]);
-          setIsPlaying(true);
+          const rndIdx = Math.floor(Math.random() * Math.min(list.length, 8));
+          setCurrentBeat(list[rndIdx]);
+          setIsPlaying(false);
         }
         setLoading(false);
       })
@@ -175,12 +176,16 @@ export default function BeatGrid() {
               fontWeight: 700,
               letterSpacing: "2px",
             }}>
-              <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
-                {[1, 2, 3].map((i) => (
-                  <span key={i} style={{ display: "inline-block", width: "3px", height: `${6 + i * 3}px`, background: "#A855F7", borderRadius: "2px", animation: `waveBar 0.6s ${i * 120}ms ease-in-out infinite` }} />
-                ))}
-              </span>
-              SONANDO: {currentBeat.name}
+              {isPlaying ? (
+                <span style={{ display: "flex", alignItems: "center", gap: "3px" }}>
+                  {[1, 2, 3].map((i) => (
+                    <span key={i} style={{ display: "inline-block", width: "3px", height: `${6 + i * 3}px`, background: "#A855F7", borderRadius: "2px", animation: `waveBar 0.6s ${i * 120}ms ease-in-out infinite` }} />
+                  ))}
+                </span>
+              ) : (
+                <span>▶</span>
+              )}
+              {isPlaying ? "SONANDO:" : "LISTO:"} {currentBeat.name}
             </div>
           </div>
         )}

@@ -133,8 +133,9 @@ export default function BeatsExplorer() {
         const list = data.beats ?? [];
         setBeats(list);
         if (list.length > 0) {
-          setCurrentBeat(list[0]);
-          setIsPlaying(true);
+          const rndIdx = Math.floor(Math.random() * Math.min(list.length, 8));
+          setCurrentBeat(list[rndIdx]);
+          setIsPlaying(false);
         }
         setLoading(false);
       })

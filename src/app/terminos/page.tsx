@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Términos y condiciones de uso del sitio y de las licencias de beats de Prod. Mvxii.",
 };
 
-const LAST_UPDATED = "28 de junio de 2025";
+const LAST_UPDATED = "28 de junio de 2026";
 
 export default function TerminosPage() {
   return (
@@ -187,7 +187,7 @@ export default function TerminosPage() {
           fontSize: "12px",
         }}
       >
-        © 2025 Prod. Mvxii · Todos los derechos reservados ·{" "}
+        © 2026 Prod. Mvxii · Todos los derechos reservados ·{" "}
         <Link href="/" style={{ color: "#8B5CF6", textDecoration: "none" }}>
           Volver al inicio
         </Link>
