@@ -6,6 +6,7 @@ import { ArrowRight, Clock } from "lucide-react";
 import BeatCard from "./BeatCard";
 import BeatCarousel from "./BeatCarousel";
 import AudioPlayer from "./AudioPlayer";
+import AudioPlayerSkeleton from "./AudioPlayerSkeleton";
 import WhatsAppFloat from "./WhatsAppFloat";
 import { Beat, beatMatchesStyle } from "@/lib/beatFilters";
 
@@ -274,16 +275,20 @@ export default function BeatGrid() {
         {!loading && general.length > 0 && <VerTodos href="/beats" label="Ver todos los beats" />}
       </div>
 
-      <AudioPlayer
-        currentBeat={currentBeat}
-        beats={beats}
-        isPlaying={isPlaying}
-        onPlayingChange={setIsPlaying}
-        onBeatChange={(beat) => {
-          setCurrentBeat(beat);
-          setIsPlaying(true);
-        }}
-      />
+      {loading ? (
+        <AudioPlayerSkeleton />
+      ) : (
+        <AudioPlayer
+          currentBeat={currentBeat}
+          beats={beats}
+          isPlaying={isPlaying}
+          onPlayingChange={setIsPlaying}
+          onBeatChange={(beat) => {
+            setCurrentBeat(beat);
+            setIsPlaying(true);
+          }}
+        />
+      )}
       <WhatsAppFloat playerActive={!!currentBeat} />
     </section>
   );

@@ -6,6 +6,7 @@ import { Search, X, SlidersHorizontal, ArrowLeft, Music2, ArrowUpDown, ChevronDo
 import BeatCard from "./BeatCard";
 import BeatCarousel from "./BeatCarousel";
 import AudioPlayer from "./AudioPlayer";
+import AudioPlayerSkeleton from "./AudioPlayerSkeleton";
 import WhatsAppFloat from "./WhatsAppFloat";
 import Vinyl from "./Vinyl";
 import {
@@ -641,16 +642,20 @@ export default function BeatsExplorer() {
         )}
       </section>
 
-      <AudioPlayer
-        currentBeat={currentBeat}
-        beats={filtered}
-        isPlaying={isPlaying}
-        onPlayingChange={setIsPlaying}
-        onBeatChange={(beat) => {
-          setCurrentBeat(beat);
-          setIsPlaying(true);
-        }}
-      />
+      {loading ? (
+        <AudioPlayerSkeleton />
+      ) : (
+        <AudioPlayer
+          currentBeat={currentBeat}
+          beats={filtered}
+          isPlaying={isPlaying}
+          onPlayingChange={setIsPlaying}
+          onBeatChange={(beat) => {
+            setCurrentBeat(beat);
+            setIsPlaying(true);
+          }}
+        />
+      )}
       <WhatsAppFloat playerActive={!!currentBeat} />
     </div>
   );
