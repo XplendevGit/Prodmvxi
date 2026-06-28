@@ -66,11 +66,15 @@ export default function ContactForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, phone, email, interest, message, consent }),
       });
+      const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setFormState("success");
       } else {
-        const data = await res.json().catch(() => ({}));
-        setErrorMsg(data.error || "Hubo un error al enviar. Intenta por WhatsApp.");
+        // data.error contains a human-readable description (including Resend config hints)
+        setErrorMsg(
+          data.error ||
+            "Hubo un error al enviar. Por favor contáctame por WhatsApp."
+        );
         setFormState("error");
       }
     } catch {
