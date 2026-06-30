@@ -26,9 +26,9 @@ export default function Home() {
 
       {/* ── Above fold — always eager ─────────────────────────── */}
       <Navigation />
-      {/* First section: futuristic Google Drive folder explorer */}
-      <DriveExplorer />
       <Hero />
+      {/* Futuristic Google Drive folder explorer — right below the hero/portada */}
+      <DriveExplorer />
       <BeatGrid />
 
       {/* ── Below fold — lazy-mounted + code-split ────────────── */}
