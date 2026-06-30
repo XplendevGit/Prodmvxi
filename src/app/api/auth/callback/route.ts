@@ -35,7 +35,8 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.GOOGLE_CLIENT_ID!;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET!;
-  const redirectUri = `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/auth/callback`;
+  // Must byte-match the redirect_uri used in /api/auth/url — both derive from origin.
+  const redirectUri = `${req.nextUrl.origin}/api/auth/callback`;
 
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
