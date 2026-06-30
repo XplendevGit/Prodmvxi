@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(req: Request) {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
 
@@ -11,9 +11,13 @@ export async function GET() {
     );
   }
 
+  // Derive the redirect URI from the request origin so it always matches the
+  // domain in use (prodmvxii.com in prod, localhost in dev) — no env var needed.
+  const origin = new URL(req.url).origin;
+
   const params = new URLSearchParams({
     client_id: clientId,
-    redirect_uri: `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/auth/callback`,
+    redirect_uri: `${origin}/api/auth/callback`,
     response_type: "code",
     access_type: "offline",
     prompt: "consent",

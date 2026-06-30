@@ -108,6 +108,9 @@ export async function listDriveFolder(
     fields: "files(id,name,mimeType,size,modifiedTime,webViewLink)",
     orderBy: "folder,name",
     pageSize: "200",
+    // Support folders shared with the authorizing account + Shared Drives.
+    supportsAllDrives: "true",
+    includeItemsFromAllDrives: "true",
   });
   const res = await fetch(`https://www.googleapis.com/drive/v3/files?${params}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
@@ -124,7 +127,7 @@ export async function getDriveFolderName(
 ): Promise<string | null> {
   try {
     const res = await fetch(
-      `https://www.googleapis.com/drive/v3/files/${folderId}?fields=name`,
+      `https://www.googleapis.com/drive/v3/files/${folderId}?fields=name&supportsAllDrives=true`,
       { headers: { Authorization: `Bearer ${accessToken}` } }
     );
     if (!res.ok) return null;
