@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
+import StructuredData from "@/components/StructuredData";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { SITE_URL, SITE_NAME, CORE_KEYWORDS, GA_MEASUREMENT_ID, musicGroupLd, webSiteLd } from "@/lib/seo";
 
 // Geist Mono removed — not used in the visual design (saves ~40 KB of font data)
 const geistSans = Geist({
@@ -11,15 +14,39 @@ const geistSans = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "Prod. Mvxii | Beats Profesionales",
+  metadataBase: new URL(SITE_URL),
+  title: "Prod. Mvxii | Comprar Beats de Trap, Reggaetón, Drill y Afrobeat",
   description:
-    "Beats exclusivos de alta calidad por Prod. Mvxii. Trap, Hip-Hop, Drill, Afrobeat y más. Licencias Básica, Estándar, Premium y Exclusiva.",
-  keywords: ["beats", "trap", "hip hop", "prod mvxii", "licencias", "música"],
-  openGraph: {
-    title: "Prod. Mvxii | Beats Profesionales",
-    description: "Beats exclusivos de alta calidad",
-    type: "website",
+    "Beats e instrumentales de alta calidad por Prod. Mvxii, productor de Chile. Trap, reggaetón, drill, afrobeat, hip-hop y dembow. Type beats y bases listas para grabar, con licencias Basic, Standard, Premium y Exclusiva.",
+  keywords: CORE_KEYWORDS,
+  applicationName: SITE_NAME,
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "music",
+  alternates: { canonical: "/" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
   },
+  openGraph: {
+    type: "website",
+    locale: "es_CL",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: "Prod. Mvxii | Comprar Beats de Trap, Reggaetón y Drill",
+    description:
+      "Beats e instrumentales urbanos listos para grabar. Type beats de trap, reggaetón, drill y afrobeat por Prod. Mvxii.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Prod. Mvxii | Comprar Beats Online",
+    description:
+      "Beats e instrumentales de trap, reggaetón, drill y afrobeat por Prod. Mvxii. Type beats listos para grabar.",
+  },
+  // To verify in Google Search Console, add the token here:
+  // verification: { google: "TOKEN_DE_SEARCH_CONSOLE" },
 };
 
 export default function RootLayout({
@@ -41,6 +68,10 @@ export default function RootLayout({
         className="min-h-full flex flex-col"
         style={{ background: "#050508", color: "#F1F5F9" }}
       >
+        {/* Global structured data — identifies the producer entity + site (GEO + rich results) */}
+        <StructuredData data={[musicGroupLd(), webSiteLd()]} />
+        {/* GA4 — Measurement ID resolved from env with a public-by-design fallback */}
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
         {children}
       </body>
     </html>

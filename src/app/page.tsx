@@ -3,6 +3,9 @@ import Navigation from "@/components/Navigation";
 import Hero from "@/components/Hero";
 import BeatGrid from "@/components/BeatGrid";
 import LazySection from "@/components/LazySection";
+import StructuredData from "@/components/StructuredData";
+import FaqSection, { FAQ_ITEMS } from "@/components/FaqSection";
+import { licensesProductLd, faqPageLd } from "@/lib/seo";
 
 // ── Below-fold components ─────────────────────────────────────────────────────
 // next/dynamic splits these into separate JS chunks that only download when
@@ -17,6 +20,9 @@ const Footer         = dynamic(() => import("@/components/Footer"));
 export default function Home() {
   return (
     <div style={{ background: "#050508", minHeight: "100vh" }}>
+      {/* Home structured data: beat-licensing product + FAQ (rich results + GEO) */}
+      <StructuredData data={[licensesProductLd(), faqPageLd(FAQ_ITEMS)]} />
+
       {/* ── Above fold — always eager ─────────────────────────── */}
       <Navigation />
       <Hero />
@@ -31,9 +37,13 @@ export default function Home() {
         <SpotifySection />
       </LazySection>
 
-      <LazySection placeholder="820px" rootMargin="700px 0px">
-        <Licenses />
-      </LazySection>
+      {/* Licenses rendered eagerly — pricing/keyword text + internal links ship
+          in the server HTML (matches the Product/Offer JSON-LD). */}
+      <Licenses />
+
+      {/* FAQ is rendered eagerly (not lazy-gated) so its answers ship in the
+          server HTML — required for rich results + AI/GEO citation. */}
+      <FaqSection />
 
       <LazySection placeholder="560px" rootMargin="700px 0px">
         <ContactForm />
@@ -43,9 +53,9 @@ export default function Home() {
         <SocialLinks />
       </LazySection>
 
-      <LazySection placeholder="320px" rootMargin="400px 0px">
-        <Footer />
-      </LazySection>
+      {/* Footer rendered eagerly — sitewide internal links + NAP (contact) must
+          be crawlable in the server HTML. */}
+      <Footer />
     </div>
   );
 }

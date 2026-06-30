@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import Image from "next/image";
 
 // Reduced from 20→8 bars and 25→8 particles: fewer animated DOM nodes during LCP
@@ -164,21 +163,33 @@ export default function Hero() {
             </h1>
           </div>
 
-          {/* Subtitle */}
+          {/* Subtitle — keyword-rich (genres) rendered in the DOM for SEO */}
           <div style={{ animation: "fadeInUp 0.8s 0.4s ease both", opacity: 0 }}>
             <p
               style={{
-                fontSize: "clamp(13px, 2.5vw, 18px)",
-                letterSpacing: "5px",
+                fontSize: "clamp(12px, 2.4vw, 17px)",
+                letterSpacing: "4px",
                 textTransform: "uppercase",
                 color: "#A855F7",
                 margin: 0,
                 fontWeight: 600,
               }}
             >
-              BEATS EXCLUSIVOS{" "}
-              <span style={{ color: "rgba(241,245,249,0.3)" }}>|</span>{" "}
-              CALIDAD PROFESIONAL
+              TRAP{" "}<span style={{ color: "rgba(241,245,249,0.3)" }}>·</span>{" "}REGGAETÓN{" "}
+              <span style={{ color: "rgba(241,245,249,0.3)" }}>·</span>{" "}DRILL{" "}
+              <span style={{ color: "rgba(241,245,249,0.3)" }}>·</span>{" "}AFROBEAT
+            </p>
+            <p
+              style={{
+                fontSize: "clamp(14px, 2.2vw, 17px)",
+                color: "rgba(241,245,249,0.62)",
+                margin: "14px auto 0",
+                maxWidth: "620px",
+                lineHeight: 1.6,
+              }}
+            >
+              Comprar beats e instrumentales online. Type beats y bases urbanas
+              listas para grabar, por Prod. Mvxii, productor de Chile.
             </p>
           </div>
 

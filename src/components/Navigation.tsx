@@ -53,7 +53,7 @@ export default function Navigation() {
           <button onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
             <Image
               src="/Logo_Maxi.jpeg"
-              alt="Prod. Mvxii"
+              alt="Prod. Mvxii — productor de beats e instrumentales"
               width={55}
               height={55}
               style={{ borderRadius: "50%", filter: "drop-shadow(0 0 8px rgba(139,92,246,0.8))" }}

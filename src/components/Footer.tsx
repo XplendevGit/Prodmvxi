@@ -63,7 +63,7 @@ export default function Footer() {
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
               <Image
                 src="/Logo_Maxi.jpeg"
-                alt="Prod. Mvxii"
+                alt="Prod. Mvxii — productor de beats, logo"
                 width={48}
                 height={48}
                 style={{ borderRadius: "50%", filter: "drop-shadow(0 0 8px rgba(139,92,246,0.6))" }}

@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import StructuredData from "@/components/StructuredData";
+import { breadcrumbLd } from "@/lib/seo";
 
 export const metadata: Metadata = {
   title: "Términos y Condiciones | Prod. Mvxii",
   description: "Términos y condiciones de uso del sitio y de las licencias de beats de Prod. Mvxii.",
+  alternates: { canonical: "/terminos" },
 };
 
 const LAST_UPDATED = "28 de junio de 2026";
@@ -11,6 +14,12 @@ const LAST_UPDATED = "28 de junio de 2026";
 export default function TerminosPage() {
   return (
     <div style={{ background: "#050508", minHeight: "100vh", color: "#F1F5F9" }}>
+      <StructuredData
+        data={breadcrumbLd([
+          { name: "Inicio", path: "/" },
+          { name: "Términos y Condiciones", path: "/terminos" },
+        ])}
+      />
       {/* Header */}
       <div
         style={{
