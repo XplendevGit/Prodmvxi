@@ -187,19 +187,19 @@ export default function DriveExplorer() {
               })}
             </div>
 
-            {/* Mode badge */}
-            <span
-              style={{
-                flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "6px",
-                padding: "4px 11px", borderRadius: "50px", fontSize: "10px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase",
-                background: mode === "drive" ? "rgba(16,185,129,0.12)" : "rgba(245,158,11,0.12)",
-                color: mode === "drive" ? "#10B981" : "#F59E0B",
-                border: `1px solid ${mode === "drive" ? "rgba(16,185,129,0.4)" : "rgba(245,158,11,0.4)"}`,
-              }}
-            >
-              <span className={mode === "drive" ? "drv-live-dot" : ""} style={{ width: "6px", height: "6px", borderRadius: "50%", background: "currentColor" }} />
-              {mode === "drive" ? "En vivo · Drive" : mode === "demo" ? "Demo" : "···"}
-            </span>
+            {/* Mode badge — only the positive "live" state is ever shown publicly */}
+            {mode === "drive" && (
+              <span
+                style={{
+                  flexShrink: 0, display: "inline-flex", alignItems: "center", gap: "6px",
+                  padding: "4px 11px", borderRadius: "50px", fontSize: "10px", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase",
+                  background: "rgba(16,185,129,0.12)", color: "#10B981", border: "1px solid rgba(16,185,129,0.4)",
+                }}
+              >
+                <span className="drv-live-dot" style={{ width: "6px", height: "6px", borderRadius: "50%", background: "currentColor" }} />
+                En vivo · Drive
+              </span>
+            )}
           </div>
 
           {/* Toolbar */}
@@ -259,12 +259,6 @@ export default function DriveExplorer() {
           </div>
         </div>
 
-        {/* Demo hint */}
-        {mode === "demo" && !loading && (
-          <p style={{ textAlign: "center", marginTop: "18px", fontSize: "12.5px", color: "rgba(245,158,11,0.7)" }}>
-            ⚡ Estructura de demostración. Conecta el Google Drive de Maxi para mostrar las carpetas y beats reales.
-          </p>
-        )}
       </div>
 
       <style>{`
