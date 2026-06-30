@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { headers } from "next/headers";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
@@ -56,11 +57,12 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const nonce = (await headers()).get("x-nonce") ?? undefined;
   return (
     <html lang="es" className={`${geistSans.variable} h-full antialiased`}>
       <head>
@@ -78,7 +80,7 @@ export default function RootLayout({
         {/* Global structured data — identifies the producer entity + site (GEO + rich results) */}
         <StructuredData data={[musicGroupLd(), webSiteLd()]} />
         {/* GA4 — Measurement ID resolved from env with a public-by-design fallback */}
-        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} />
+        <GoogleAnalytics gaId={GA_MEASUREMENT_ID} nonce={nonce} />
         {children}
       </body>
     </html>

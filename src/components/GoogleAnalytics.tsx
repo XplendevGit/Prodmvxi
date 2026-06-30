@@ -14,7 +14,7 @@ declare global {
   }
 }
 
-export default function GoogleAnalytics({ gaId }: { gaId?: string }) {
+export default function GoogleAnalytics({ gaId, nonce }: { gaId?: string; nonce?: string }) {
   const pathname = usePathname();
 
   // Fire a page_view on client-side route changes (the initial load is handled
@@ -31,8 +31,9 @@ export default function GoogleAnalytics({ gaId }: { gaId?: string }) {
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}
         strategy="afterInteractive"
+        nonce={nonce}
       />
-      <Script id="ga-init" strategy="afterInteractive">
+      <Script id="ga-init" strategy="afterInteractive" nonce={nonce}>
         {`
           window.dataLayer = window.dataLayer || [];
           function gtag(){dataLayer.push(arguments);}
