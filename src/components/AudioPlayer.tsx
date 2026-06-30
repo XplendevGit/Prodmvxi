@@ -544,11 +544,21 @@ export default function AudioPlayer({
               >
                 {currentBeat.name}
               </div>
-              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "3px" }}>
-                <span style={{ fontSize: "11px", color: "rgba(241,245,249,0.45)" }}>
+              <div style={{ display: "flex", gap: "6px", alignItems: "center", marginTop: "3px", minWidth: 0, overflow: "hidden" }}>
+                <span
+                  style={{
+                    fontSize: "11px",
+                    color: "rgba(241,245,249,0.45)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                    minWidth: 0,
+                  }}
+                >
                   {currentBeat.genre} · {currentBeat.bpm} BPM
                 </span>
                 <span
+                  className="np-preview"
                   style={{
                     padding: "1px 6px",
                     borderRadius: "4px",
@@ -558,6 +568,8 @@ export default function AudioPlayer({
                     background: "rgba(6,182,212,0.12)",
                     color: "#06B6D4",
                     border: "1px solid rgba(6,182,212,0.25)",
+                    flexShrink: 0,
+                    whiteSpace: "nowrap",
                   }}
                 >
                   PREVIEW
@@ -678,6 +690,11 @@ export default function AudioPlayer({
           }
           @media (max-width: 480px) {
             .vol-ctrl { display: none !important; }
+          }
+          /* On very narrow screens hide the PREVIEW pill so the now-playing
+             metadata can't collide with the playback controls. */
+          @media (max-width: 430px) {
+            .np-preview { display: none !important; }
           }
         `}</style>
       </div>
