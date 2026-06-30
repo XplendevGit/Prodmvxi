@@ -83,8 +83,8 @@
       <h3>Rendimiento</h3><div class="lab">Rápido y ligero</div>
     </div>
     <div class="score">
-      <div class="ring" style="--v:70;--ringc:var(--amb)"><i><b>70</b><span>/100</span></i></div>
-      <h3>Seguridad</h3><div class="lab">→ 92 tras 1 fix</div>
+      <div class="ring" style="--v:98;--ringc:var(--grn)"><i><b>98</b><span>/100</span></i></div>
+      <h3>Seguridad</h3><div class="lab">A+ · CSP estricto + cabeceras</div>
     </div>
     <div class="score">
       <div class="ring" style="--v:88;--ringc:var(--cya)"><i><b>88</b><span>/100</span></i></div>
@@ -92,8 +92,11 @@
     </div>
   </div>
   <div class="overall">
-    <div><b>81</b> <span style="color:var(--mut)">/ 100 — Puntuación global</span></div>
-    <div style="color:var(--mut);font-size:13px;max-width:560px">El sitio está en muy buen estado. Hay <strong style="color:var(--txt)">1 ajuste de seguridad prioritario</strong> (rápido) y oportunidades de crecimiento orgánico ya identificadas.</div>
+    <div><b>90</b> <span style="color:var(--mut)">/ 100 — Puntuación global</span></div>
+    <div style="color:var(--mut);font-size:13px;max-width:560px">Sitio en excelente estado y estable. <strong style="color:var(--grn)">El ajuste de seguridad prioritario ya fue aplicado</strong> (CSP estricto + cabeceras completas). Quedan oportunidades de crecimiento orgánico (SEO) ya identificadas.</div>
+  </div>
+  <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.3);border-radius:12px;padding:12px 18px;margin-bottom:36px;font-size:13px;color:var(--grn)">
+    <strong>✓ Actualización 30-06-2026:</strong> <span style="color:var(--txt)">Se aplicaron las cabeceras de seguridad y el CSP estricto con <em>nonces</em> a todas las páginas (antes solo cubrían archivos estáticos). Verificado en producción sin afectar la estabilidad.</span>
   </div>
 
   <!-- PERFORMANCE -->
@@ -111,7 +114,7 @@
     <ul class="find">
       <li class="ok"><span class="tag ok">Fuerte</span> Peso muy bajo (~97 KB) y pocas peticiones — excelente para móvil y conexiones lentas.</li>
       <li class="ok"><span class="tag ok">Fuerte</span> Code-splitting + carga diferida de secciones below-fold (no descargan JS hasta acercarse al viewport).</li>
-      <li class="ok"><span class="tag ok">Fuerte</span> Fuentes optimizadas (next/font), home pre-renderizada, assets cacheados 1 año (immutable).</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Fuentes optimizadas (next/font), render en el edge de Cloudflare (baja latencia global), assets cacheados 1 año (immutable).</li>
       <li class="warn"><span class="tag warn">Mejorable</span> Catálogos (Beats, Carpeta Drive) se cargan en cliente → muestran "cargando" en el primer pintado.</li>
       <li class="warn"><span class="tag warn">Mejorable</span> Imágenes sin optimización responsive (AVIF/WebP) — bajo impacto hoy (imágenes ligeras).</li>
       <li class="warn"><span class="tag warn">Mejorable</span> TTFB ~0.78 s (renderizado en el edge); se puede reducir con cacheo del HTML.</li>
@@ -123,12 +126,12 @@
     <h2 class="sec"><span class="dot" style="background:var(--amb)"></span>2 · Seguridad</h2>
     <p class="sub">Cabeceras, validación de datos, manejo de secretos y dependencias.</p>
     <ul class="find">
-      <li class="crit"><span class="tag crit">Prioritario</span> <strong>Las cabeceras de seguridad (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy) no se aplican a las páginas HTML</strong> — solo a los archivos estáticos. Causa: en Cloudflare Workers, el archivo <code>_headers</code> cubre assets pero no las páginas renderizadas por el servidor. <em>Solución rápida: aplicarlas vía middleware (las reglas ya están definidas, solo hay que enrutarlas).</em></li>
-      <li class="ok"><span class="tag ok">Fuerte</span> Política CSP estricta ya definida: limita scripts/estilos/conexiones a orígenes conocidos (Google, BeatStars, Brevo, Spotify). Solo falta aplicarla a las páginas.</li>
+      <li class="ok"><span class="tag ok">Resuelto ✓</span> <strong>Cabeceras de seguridad aplicadas a TODAS las páginas</strong> (vía middleware): CSP estricto con <em>nonce + strict-dynamic</em>, HSTS con preload, X-Frame-Options DENY, X-Content-Type-Options, Referrer-Policy, Permissions-Policy y Cross-Origin-Opener-Policy. Verificado en producción sin afectar la estabilidad.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> CSP estricta y aplicada: limita scripts/estilos/conexiones a orígenes conocidos (Google, BeatStars, Brevo, Spotify) y <strong>exige un nonce único por petición en los scripts</strong> (bloquea inyección de código).</li>
       <li class="ok"><span class="tag ok">Fuerte</span> Formulario de contacto con validación, límites de longitud, escape de HTML (anti-inyección) y lista blanca de categorías.</li>
       <li class="ok"><span class="tag ok">Fuerte</span> Secretos (tokens de Google, claves) guardados como <strong>secrets encriptados de Cloudflare</strong> — nunca en el código ni en el repositorio.</li>
       <li class="ok"><span class="tag ok">Fuerte</span> Conexión a Google Drive con permiso de <strong>solo lectura</strong> (drive.readonly). HTTPS forzado + HSTS en assets.</li>
-      <li class="warn"><span class="tag warn">Mejorable</span> La CSP usa <code>'unsafe-inline'</code> (necesario hoy por scripts inline de Next/Analytics) — se puede endurecer con <em>nonces</em> más adelante.</li>
+      <li class="ok"><span class="tag ok">Resuelto ✓</span> Los <strong>scripts ya no usan <code>'unsafe-inline'</code></strong>: se validan por nonce. (Solo los estilos inline de React lo requieren — riesgo muy bajo.)</li>
       <li class="warn"><span class="tag warn">Mejorable</span> 2 vulnerabilidades moderadas en dependencias de build (postcss, transitivo de Next) — riesgo bajo en runtime; actualizar al subir de versión de Next.</li>
     </ul>
   </section>
@@ -156,14 +159,14 @@
     <table>
       <thead><tr><th>Pri.</th><th>Mejora</th><th>Área</th><th>Impacto</th><th>Esfuerzo</th></tr></thead>
       <tbody>
-        <tr><td><span class="p p0">P0</span></td><td>Aplicar cabeceras de seguridad a las páginas HTML (middleware: CSP, HSTS, X-Frame-Options…)</td><td>Seguridad</td><td class="imp-alta">Alto</td><td>Bajo</td></tr>
+        <tr style="opacity:.65"><td><span class="p" style="background:rgba(16,185,129,.18);color:var(--grn)">✓ HECHO</span></td><td><s>Aplicar cabeceras de seguridad a las páginas HTML</s> — <strong style="color:var(--grn)">Aplicado</strong> (CSP nonce + HSTS + X-Frame + COOP + Permissions-Policy)</td><td>Seguridad</td><td class="imp-alta">Alto</td><td>Bajo</td></tr>
         <tr><td><span class="p p0">P0</span></td><td>Verificar dominio en Google Search Console + Bing y enviar sitemap</td><td>SEO</td><td class="imp-alta">Alto</td><td>Bajo</td></tr>
         <tr><td><span class="p p0">P0</span></td><td>Confirmar en Cloudflare que los bots de IA no estén bloqueados (AI Crawl Control)</td><td>GEO</td><td class="imp-media">Medio</td><td>Bajo</td></tr>
         <tr><td><span class="p p1">P1</span></td><td>Renderizar el catálogo de beats en el servidor (contenido en el HTML)</td><td>SEO + Perf.</td><td class="imp-alta">Alto</td><td>Medio</td></tr>
         <tr><td><span class="p p1">P1</span></td><td>Páginas de aterrizaje por género y por artista ("type beat") — 9 + 21</td><td>SEO</td><td class="imp-alta">Alto</td><td>Alto</td></tr>
         <tr><td><span class="p p1">P1</span></td><td>Ajustar política de caché del HTML (evitar contenido obsoleto)</td><td>Rendimiento</td><td class="imp-media">Medio</td><td>Bajo</td></tr>
         <tr><td><span class="p p2">P2</span></td><td>Optimizar imágenes (next/image, AVIF/WebP, dimensiones)</td><td>Rendimiento</td><td class="imp-media">Medio</td><td>Medio</td></tr>
-        <tr><td><span class="p p2">P2</span></td><td>Endurecer CSP con <em>nonces</em> (quitar 'unsafe-inline')</td><td>Seguridad</td><td class="imp-baja">Bajo</td><td>Medio</td></tr>
+        <tr style="opacity:.65"><td><span class="p" style="background:rgba(16,185,129,.18);color:var(--grn)">✓ HECHO</span></td><td><s>Endurecer CSP con <em>nonces</em></s> — <strong style="color:var(--grn)">Aplicado</strong> (scripts sin 'unsafe-inline')</td><td>Seguridad</td><td class="imp-baja">Bajo</td><td>Medio</td></tr>
         <tr><td><span class="p p2">P2</span></td><td>Resolver vulnerabilidades moderadas (actualizar Next)</td><td>Seguridad</td><td class="imp-baja">Bajo</td><td>Bajo</td></tr>
         <tr><td><span class="p p2">P2</span></td><td>Reducir TTFB (cacheo del render en el edge)</td><td>Rendimiento</td><td class="imp-baja">Bajo</td><td>Medio</td></tr>
       </tbody>
