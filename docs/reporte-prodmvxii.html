@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reporte Técnico — Prod. Mvxii | Rendimiento · Seguridad · SEO/GEO</title>
+<style>
+  :root{
+    --bg:#070710; --card:#0e0e1d; --card2:#13132a; --line:rgba(139,92,246,.18);
+    --txt:#E9ECF4; --mut:#9aa3b8; --pur:#A855F7; --cya:#06B6D4; --pnk:#EC4899;
+    --grn:#10B981; --amb:#F59E0B; --red:#EF4444;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:980px;margin:0 auto;padding:40px 24px 80px}
+  a{color:var(--pur);text-decoration:none}
+  /* Header */
+  .hero{text-align:center;padding:50px 24px 40px;border-radius:24px;margin-bottom:34px;
+    background:radial-gradient(ellipse at 50% 0%,#2a1860 0%,#160a33 45%,#070710 100%);
+    border:1px solid var(--line)}
+  .eyebrow{display:inline-block;font-size:11px;letter-spacing:4px;text-transform:uppercase;color:var(--pur);font-weight:700;margin-bottom:14px}
+  .hero h1{font-size:clamp(26px,5vw,42px);margin:0 0 8px;font-weight:900;letter-spacing:1px}
+  .hero p{color:var(--mut);margin:6px 0 0;font-size:14px}
+  .badges{margin-top:18px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .pill{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:5px 12px;border-radius:50px;border:1px solid}
+  /* Scorecards */
+  .scores{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:14px}
+  .score{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px;text-align:center}
+  .ring{--v:0;width:110px;height:110px;border-radius:50%;margin:4px auto 12px;display:flex;align-items:center;justify-content:center;
+    background:conic-gradient(var(--ringc) calc(var(--v)*1%), rgba(255,255,255,.06) 0)}
+  .ring i{width:86px;height:86px;border-radius:50%;background:var(--card);display:flex;flex-direction:column;align-items:center;justify-content:center;font-style:normal}
+  .ring b{font-size:28px;font-weight:900;line-height:1}
+  .ring span{font-size:10px;color:var(--mut)}
+  .score h3{margin:0 0 4px;font-size:15px;letter-spacing:1px;text-transform:uppercase}
+  .score .lab{font-size:12px;color:var(--mut)}
+  .overall{background:linear-gradient(135deg,rgba(139,92,246,.14),rgba(6,182,212,.08));border:1px solid var(--line);border-radius:18px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:36px;flex-wrap:wrap}
+  .overall b{font-size:30px;font-weight:900}
+  /* Sections */
+  section{margin-bottom:34px}
+  h2.sec{font-size:20px;letter-spacing:1px;margin:0 0 4px;display:flex;align-items:center;gap:10px}
+  h2.sec .dot{width:10px;height:10px;border-radius:50%}
+  .sub{color:var(--mut);font-size:13px;margin:0 0 16px}
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:14px 0}
+  .metric{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+  .metric b{display:block;font-size:20px;font-weight:800}
+  .metric span{font-size:11px;color:var(--mut);text-transform:uppercase;letter-spacing:.5px}
+  ul.find{list-style:none;padding:0;margin:0}
+  ul.find li{background:var(--card);border:1px solid var(--line);border-left-width:3px;border-radius:10px;padding:11px 14px;margin-bottom:8px;font-size:14px}
+  li.ok{border-left-color:var(--grn)} li.warn{border-left-color:var(--amb)} li.crit{border-left-color:var(--red)}
+  .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:2px 7px;border-radius:5px;margin-right:8px}
+  .tag.ok{background:rgba(16,185,129,.14);color:var(--grn)} .tag.warn{background:rgba(245,158,11,.14);color:var(--amb)} .tag.crit{background:rgba(239,68,68,.16);color:var(--red)}
+  /* Plan table */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:8px}
+  th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line)}
+  th{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--mut)}
+  td .p{font-weight:800;border-radius:6px;padding:2px 8px;font-size:11px}
+  .p0{background:rgba(239,68,68,.16);color:var(--red)} .p1{background:rgba(245,158,11,.16);color:var(--amb)} .p2{background:rgba(6,182,212,.14);color:var(--cya)}
+  .imp-alta{color:var(--grn);font-weight:700} .imp-media{color:var(--amb)} .imp-baja{color:var(--mut)}
+  footer{text-align:center;color:var(--mut);font-size:12px;margin-top:50px;padding-top:24px;border-top:1px solid var(--line)}
+  .legend{font-size:12px;color:var(--mut);margin-top:6px}
+  @media print{body{background:#fff;color:#111}.hero{background:#f3f0ff}.score,.metric,ul.find li,.overall{background:#fff;border-color:#ddd}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="hero">
+    <div class="eyebrow">Reporte Técnico · Auditoría</div>
+    <h1>Prod. Mvxii — Sitio Web</h1>
+    <p>Análisis de <strong>Rendimiento</strong>, <strong>Seguridad</strong> y <strong>SEO / GEO</strong></p>
+    <p><a href="https://prodmvxii.com">prodmvxii.com</a> · Medido en producción · 30 de junio de 2026</p>
+    <div class="badges">
+      <span class="pill" style="color:var(--cya);border-color:rgba(6,182,212,.4)">Next.js 16 · React 19</span>
+      <span class="pill" style="color:var(--pur);border-color:rgba(168,85,247,.4)">Cloudflare (OpenNext)</span>
+      <span class="pill" style="color:var(--grn);border-color:rgba(16,185,129,.4)">HTTPS</span>
+    </div>
+  </div>
+
+  <!-- SCORECARDS -->
+  <div class="scores">
+    <div class="score">
+      <div class="ring" style="--v:84;--ringc:var(--grn)"><i><b>84</b><span>/100</span></i></div>
+      <h3>Rendimiento</h3><div class="lab">Rápido y ligero</div>
+    </div>
+    <div class="score">
+      <div class="ring" style="--v:70;--ringc:var(--amb)"><i><b>70</b><span>/100</span></i></div>
+      <h3>Seguridad</h3><div class="lab">→ 92 tras 1 fix</div>
+    </div>
+    <div class="score">
+      <div class="ring" style="--v:88;--ringc:var(--cya)"><i><b>88</b><span>/100</span></i></div>
+      <h3>SEO / GEO</h3><div class="lab">Base profesional</div>
+    </div>
+  </div>
+  <div class="overall">
+    <div><b>81</b> <span style="color:var(--mut)">/ 100 — Puntuación global</span></div>
+    <div style="color:var(--mut);font-size:13px;max-width:560px">El sitio está en muy buen estado. Hay <strong style="color:var(--txt)">1 ajuste de seguridad prioritario</strong> (rápido) y oportunidades de crecimiento orgánico ya identificadas.</div>
+  </div>
+
+  <!-- PERFORMANCE -->
+  <section>
+    <h2 class="sec"><span class="dot" style="background:var(--grn)"></span>1 · Rendimiento</h2>
+    <p class="sub">Métricas reales medidas en el navegador sobre la home en producción.</p>
+    <div class="metrics">
+      <div class="metric"><b>~97 KB</b><span>Transferido (home)</span></div>
+      <div class="metric"><b>37</b><span>Peticiones</span></div>
+      <div class="metric"><b>0.78 s</b><span>TTFB</span></div>
+      <div class="metric"><b>2.5 s</b><span>DOM listo</span></div>
+      <div class="metric"><b>3.4 s</b><span>Carga total</span></div>
+      <div class="metric"><b>1.232</b><span>Nodos DOM</span></div>
+    </div>
+    <ul class="find">
+      <li class="ok"><span class="tag ok">Fuerte</span> Peso muy bajo (~97 KB) y pocas peticiones — excelente para móvil y conexiones lentas.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Code-splitting + carga diferida de secciones below-fold (no descargan JS hasta acercarse al viewport).</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Fuentes optimizadas (next/font), home pre-renderizada, assets cacheados 1 año (immutable).</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> Catálogos (Beats, Carpeta Drive) se cargan en cliente → muestran "cargando" en el primer pintado.</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> Imágenes sin optimización responsive (AVIF/WebP) — bajo impacto hoy (imágenes ligeras).</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> TTFB ~0.78 s (renderizado en el edge); se puede reducir con cacheo del HTML.</li>
+    </ul>
+  </section>
+
+  <!-- SECURITY -->
+  <section>
+    <h2 class="sec"><span class="dot" style="background:var(--amb)"></span>2 · Seguridad</h2>
+    <p class="sub">Cabeceras, validación de datos, manejo de secretos y dependencias.</p>
+    <ul class="find">
+      <li class="crit"><span class="tag crit">Prioritario</span> <strong>Las cabeceras de seguridad (CSP, HSTS, X-Frame-Options, Referrer-Policy, Permissions-Policy) no se aplican a las páginas HTML</strong> — solo a los archivos estáticos. Causa: en Cloudflare Workers, el archivo <code>_headers</code> cubre assets pero no las páginas renderizadas por el servidor. <em>Solución rápida: aplicarlas vía middleware (las reglas ya están definidas, solo hay que enrutarlas).</em></li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Política CSP estricta ya definida: limita scripts/estilos/conexiones a orígenes conocidos (Google, BeatStars, Brevo, Spotify). Solo falta aplicarla a las páginas.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Formulario de contacto con validación, límites de longitud, escape de HTML (anti-inyección) y lista blanca de categorías.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Secretos (tokens de Google, claves) guardados como <strong>secrets encriptados de Cloudflare</strong> — nunca en el código ni en el repositorio.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Conexión a Google Drive con permiso de <strong>solo lectura</strong> (drive.readonly). HTTPS forzado + HSTS en assets.</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> La CSP usa <code>'unsafe-inline'</code> (necesario hoy por scripts inline de Next/Analytics) — se puede endurecer con <em>nonces</em> más adelante.</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> 2 vulnerabilidades moderadas en dependencias de build (postcss, transitivo de Next) — riesgo bajo en runtime; actualizar al subir de versión de Next.</li>
+    </ul>
+  </section>
+
+  <!-- SEO / GEO -->
+  <section>
+    <h2 class="sec"><span class="dot" style="background:var(--cya)"></span>3 · SEO &amp; GEO <span style="font-size:12px;color:var(--mut);font-weight:400">(optimización para IA: ChatGPT, Perplexity, Google AI)</span></h2>
+    <p class="sub">Indexabilidad, datos estructurados y visibilidad en buscadores tradicionales y de IA.</p>
+    <ul class="find">
+      <li class="ok"><span class="tag ok">Fuerte</span> Metadatos completos: títulos/descripciones transaccionales por página, canonical, palabras clave del nicho (trap, reggaetón, type beats, etc.).</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> Imagen social 1200×630 + Twitter card grande → previsualización profesional al compartir.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> <strong>Datos estructurados (JSON-LD)</strong>: MusicGroup (el productor), WebSite, Producto + precios de licencias, FAQ y Breadcrumbs — habilitan resultados enriquecidos y citación por IA.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> <strong>GEO:</strong> robots.txt da la bienvenida explícita a crawlers de IA (GPTBot, PerplexityBot, ClaudeBot, Google-Extended…) + FAQ renderizada en el HTML para ser citada.</li>
+      <li class="ok"><span class="tag ok">Fuerte</span> sitemap.xml, manifest PWA, favicons de marca, Google Analytics 4, idioma <code>es</code>, headings semánticos y alt text.</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> El catálogo de beats se renderiza en cliente → los buscadores no ven los nombres/géneros/artistas en el HTML. <strong>Es la mayor palanca de tráfico orgánico.</strong></li>
+      <li class="warn"><span class="tag warn">Mejorable</span> Sin páginas de aterrizaje por género y por artista ("type beat"). La taxonomía (9 géneros, 21 artistas) ya existe — falta convertirla en URLs.</li>
+      <li class="warn"><span class="tag warn">Mejorable</span> Pendiente: verificar el dominio en Google Search Console + Bing y enviar el sitemap; confirmar que Cloudflare no bloquee bots de IA.</li>
+    </ul>
+  </section>
+
+  <!-- PLAN -->
+  <section>
+    <h2 class="sec"><span class="dot" style="background:var(--pur)"></span>Plan de mejoras priorizado</h2>
+    <p class="sub">De mayor a menor prioridad. P0 = hacer ya · P1 = alto retorno · P2 = pulido.</p>
+    <table>
+      <thead><tr><th>Pri.</th><th>Mejora</th><th>Área</th><th>Impacto</th><th>Esfuerzo</th></tr></thead>
+      <tbody>
+        <tr><td><span class="p p0">P0</span></td><td>Aplicar cabeceras de seguridad a las páginas HTML (middleware: CSP, HSTS, X-Frame-Options…)</td><td>Seguridad</td><td class="imp-alta">Alto</td><td>Bajo</td></tr>
+        <tr><td><span class="p p0">P0</span></td><td>Verificar dominio en Google Search Console + Bing y enviar sitemap</td><td>SEO</td><td class="imp-alta">Alto</td><td>Bajo</td></tr>
+        <tr><td><span class="p p0">P0</span></td><td>Confirmar en Cloudflare que los bots de IA no estén bloqueados (AI Crawl Control)</td><td>GEO</td><td class="imp-media">Medio</td><td>Bajo</td></tr>
+        <tr><td><span class="p p1">P1</span></td><td>Renderizar el catálogo de beats en el servidor (contenido en el HTML)</td><td>SEO + Perf.</td><td class="imp-alta">Alto</td><td>Medio</td></tr>
+        <tr><td><span class="p p1">P1</span></td><td>Páginas de aterrizaje por género y por artista ("type beat") — 9 + 21</td><td>SEO</td><td class="imp-alta">Alto</td><td>Alto</td></tr>
+        <tr><td><span class="p p1">P1</span></td><td>Ajustar política de caché del HTML (evitar contenido obsoleto)</td><td>Rendimiento</td><td class="imp-media">Medio</td><td>Bajo</td></tr>
+        <tr><td><span class="p p2">P2</span></td><td>Optimizar imágenes (next/image, AVIF/WebP, dimensiones)</td><td>Rendimiento</td><td class="imp-media">Medio</td><td>Medio</td></tr>
+        <tr><td><span class="p p2">P2</span></td><td>Endurecer CSP con <em>nonces</em> (quitar 'unsafe-inline')</td><td>Seguridad</td><td class="imp-baja">Bajo</td><td>Medio</td></tr>
+        <tr><td><span class="p p2">P2</span></td><td>Resolver vulnerabilidades moderadas (actualizar Next)</td><td>Seguridad</td><td class="imp-baja">Bajo</td><td>Bajo</td></tr>
+        <tr><td><span class="p p2">P2</span></td><td>Reducir TTFB (cacheo del render en el edge)</td><td>Rendimiento</td><td class="imp-baja">Bajo</td><td>Medio</td></tr>
+      </tbody>
+    </table>
+    <p class="legend">Recomendación: ejecutar los 3 ítems <strong>P0</strong> de inmediato (impacto alto, esfuerzo bajo). Los <strong>P1</strong> son el siguiente bloque de crecimiento orgánico (más visitas desde Google e IA).</p>
+  </section>
+
+  <footer>
+    Reporte generado para Prod. Mvxii · Auditoría técnica en producción · 30-06-2026<br>
+    Desarrollo: XPLENDEV × PROD. MVXII
+  </footer>
+
+</div>
+</body>
+</html>
