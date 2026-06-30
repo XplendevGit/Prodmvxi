@@ -5,9 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Clock } from "lucide-react";
 import BeatCard from "./BeatCard";
 import BeatCarousel from "./BeatCarousel";
-import AudioPlayer from "./AudioPlayer";
-import AudioPlayerSkeleton from "./AudioPlayerSkeleton";
-import WhatsAppFloat from "./WhatsAppFloat";
+import { usePlayer } from "./player/PlayerProvider";
 import { Beat, beatMatchesStyle } from "@/lib/beatFilters";
 
 interface BeatsResponse {
@@ -44,11 +42,11 @@ interface BeatGridProps {
 }
 
 export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridProps) {
+  const player = usePlayer();
+  const { currentBeat, isPlaying } = player;
   const [beats, setBeats] = useState<Beat[]>(initialBeats);
   const [loading, setLoading] = useState(initialBeats.length === 0);
   const [error, setError] = useState<string | null>(null);
-  const [currentBeat, setCurrentBeat] = useState<Beat | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [isDemoMode, setIsDemoMode] = useState(initialMode === "demo");
   const [isBeatstarsMode, setIsBeatstarsMode] = useState(initialMode === "beatstars");
   const [isMobile, setIsMobile] = useState(false);
@@ -84,23 +82,18 @@ export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridPro
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Pick a featured beat once we have data (client-only → no hydration mismatch).
+  // Feature a beat in the shared player once we have data (ready, not playing).
   useEffect(() => {
-    if (!currentBeat && beats.length > 0) {
-      setCurrentBeat(beats[Math.floor(Math.random() * Math.min(beats.length, 8))]);
+    if (beats.length > 0) {
+      player.feature(beats[Math.floor(Math.random() * Math.min(beats.length, 8))], beats);
     }
-  }, [beats, currentBeat]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [beats]);
 
   const oldSchool = useMemo(() => beats.filter((b) => beatMatchesStyle(b, "Old School")), [beats]);
   const general = beats;
 
-  const handlePlay = (beat: Beat) => {
-    if (currentBeat?.id === beat.id) setIsPlaying(!isPlaying);
-    else {
-      setCurrentBeat(beat);
-      setIsPlaying(true);
-    }
-  };
+  const handlePlay = (beat: Beat) => player.play(beat, beats);
 
   const renderGrid = (list: Beat[]) => {
     if (mounted && isMobile) {
@@ -288,22 +281,6 @@ export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridPro
         {renderGrid(general)}
         {!loading && general.length > 0 && <VerTodos href="/beats" label="Ver todos los beats" />}
       </div>
-
-      {loading ? (
-        <AudioPlayerSkeleton />
-      ) : (
-        <AudioPlayer
-          currentBeat={currentBeat}
-          beats={beats}
-          isPlaying={isPlaying}
-          onPlayingChange={setIsPlaying}
-          onBeatChange={(beat) => {
-            setCurrentBeat(beat);
-            setIsPlaying(true);
-          }}
-        />
-      )}
-      <WhatsAppFloat playerActive={!!currentBeat} />
     </section>
   );
 }

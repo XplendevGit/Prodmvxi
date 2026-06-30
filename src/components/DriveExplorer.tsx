@@ -6,6 +6,8 @@ import {
   Music, FileText, ExternalLink,
 } from "lucide-react";
 import type { DriveItem, DriveListing } from "@/lib/googleDrive";
+import type { Beat } from "@/lib/beatFilters";
+import { usePlayer } from "./player/PlayerProvider";
 
 interface Crumb {
   id: string;   // "" = root
@@ -33,15 +35,32 @@ function formatSize(bytes: number | null): string {
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1000)} KB`;
 }
 
+/** Convert a Drive audio item into a Beat the shared AudioPlayer can stream. */
+function driveItemToBeat(item: DriveItem): Beat {
+  const meta = parseAudio(item.name);
+  const url = `/api/drive/audio?id=${encodeURIComponent(item.id)}`;
+  return {
+    id: item.id,
+    name: meta.title,
+    bpm: meta.bpm ?? "—",
+    genre: meta.genre ?? "Drive",
+    price: "",
+    previewUrl: url,
+    streamUrl: url,
+    isHls: false,
+    waveformUrl: null,
+    artwork: null,
+  };
+}
+
 export default function DriveExplorer({ initialListing }: { initialListing?: DriveListing }) {
   const [path, setPath] = useState<Crumb[]>([{ id: "", name: initialListing?.folderName ?? "Beats" }]);
   const [items, setItems] = useState<DriveItem[]>(initialListing?.items ?? []);
   const [mode, setMode] = useState<"drive" | "demo" | null>(initialListing?.mode ?? null);
   const [loading, setLoading] = useState(!initialListing);
   const [error, setError] = useState(false);
-  const [playingId, setPlayingId] = useState<string | null>(null);
 
-  const audioRef = useRef<HTMLAudioElement>(null);
+  const player = usePlayer();
   const firstRun = useRef(true);
   const current = path[path.length - 1];
 
@@ -77,20 +96,21 @@ export default function DriveExplorer({ initialListing }: { initialListing?: Dri
     setPath((p) => p.slice(0, index + 1));
   }, []);
 
-  const togglePlay = useCallback((item: DriveItem) => {
-    const audio = audioRef.current;
-    if (!audio || !item.streamUrl) return; // demo / no stream → no-op
-    if (playingId === item.id) {
-      audio.pause();
-      setPlayingId(null);
-    } else {
-      audio.src = item.streamUrl;
-      audio.play().then(() => setPlayingId(item.id)).catch(() => setPlayingId(null));
-    }
-  }, [playingId]);
-
   const folders = items.filter((i) => i.type === "folder");
   const files = items.filter((i) => i.type !== "folder");
+
+  // Play a Drive audio file through the SHARED bottom player (exactly like the
+  // catalog beats), streamed via our /api/drive/audio proxy. The folder's audio
+  // files become the prev/next queue. Only real Drive (not demo) can stream.
+  const canPlay = mode === "drive";
+  const handlePlayFile = useCallback(
+    (item: DriveItem) => {
+      if (!canPlay) return;
+      const queue = files.filter((f) => f.type === "audio").map(driveItemToBeat);
+      player.play(driveItemToBeat(item), queue);
+    },
+    [canPlay, files, player]
+  );
 
   return (
     <section
@@ -102,8 +122,6 @@ export default function DriveExplorer({ initialListing }: { initialListing?: Dri
         overflow: "hidden",
       }}
     >
-      <audio ref={audioRef} onEnded={() => setPlayingId(null)} preload="none" />
-
       {/* Ambient glow accents */}
       <div className="drv-orb drv-orb-a" />
       <div className="drv-orb drv-orb-b" />
@@ -251,9 +269,9 @@ export default function DriveExplorer({ initialListing }: { initialListing?: Dri
                   <FileCard
                     key={item.id}
                     item={item}
-                    playing={playingId === item.id}
-                    canPlay={!!item.streamUrl}
-                    onPlay={() => togglePlay(item)}
+                    playing={player.currentBeat?.id === item.id && player.isPlaying}
+                    canPlay={canPlay && item.type === "audio"}
+                    onPlay={() => handlePlayFile(item)}
                   />
                 ))}
               </div>
