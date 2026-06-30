@@ -37,12 +37,24 @@ Hecho en código y verificado con `next build` + inspección del HTML pre-render
    - **Cloudflare Pages:** Settings → Environment variables → `NEXT_PUBLIC_GA_ID` (Production + Preview) → redeploy.
 3. (Recomendado) Enlaza GA4 con **Google Search Console** para cruzar queries orgánicas con comportamiento.
 
-### 🔴 ACCIONES MANUALES EN CLOUDFLARE (críticas para que esto surta efecto)
+### 🚀 DESPLEGADO — v1 empresarial en vivo (2026-06-30)
 
-1. **robots.txt gestionado:** Cloudflare sirve hoy su propio robots.txt ("Content Signals") que puede **sobrescribir** el nuestro. Ve a tu dominio → **Settings/Bots → "Manage robots.txt"** y **desactívalo** (o configúralo) para que se sirva el `/robots.txt` de la app.
-2. **Bloqueo de bots de IA:** revisa **AI Audit / Bots → "Block AI Scrapers and Crawlers"**. Si está activo, **bloquea el GEO** (ChatGPT/Perplexity/Google AI no podrán leer el sitio). Para aparecer en respuestas de IA, **permite** al menos los bots de *AI search / RAG*.
+Desplegado a Cloudflare (worker `prodmvxi`) y verificado en vivo: todas las rutas 200, GA activo (`G-LH197LBY45`), JSON-LD (MusicGroup/FAQPage/AggregateOffer), canonical, OG image, FAQ y Footer en el HTML, y `/robots.txt` + `/sitemap.xml` sirviéndose.
+
+> ⚠️ **Lecciones de build (CRÍTICAS para futuros deploys):**
+> 1. El build **DEBE usar webpack**, no Turbopack (`"build": "next build --webpack"`). Turbopack genera chunks de servidor que OpenNext/Workers no puede cargar → `ChunkLoadError` y **500 en todo el sitio**.
+> 2. **No usar `runtime = "edge"`** en route handlers — OpenNext no lo soporta inline (rompe el build). Usa el runtime nodejs por defecto.
+> 3. **No usar `next/og`** (opengraph-image dinámica) — su wasm no bundlea bajo OpenNext en Windows. La OG image es estática (el logo).
+> 4. Tras cada `npm run deploy`, **verifica en vivo** (curl). Si algo falla: `npx wrangler rollback <version-id-anterior>`.
+
+### 🔴 ACCIONES MANUALES PENDIENTES
+
+1. ✅ **robots.txt** — RESUELTO: el worker sirve nuestro `/robots.txt` (tiene precedencia sobre el de Cloudflare). No requiere acción.
+2. **Bloqueo de bots de IA (Cloudflare):** revisa el dashboard → dominio `prodmvxii.com` → **AI Crawl Control** (antes "AI Audit") o **Security → Bots**. Si "Block AI Scrapers and Crawlers" está activo, **bloquea el GEO** a nivel de red (independiente del robots.txt). Para aparecer en ChatGPT/Perplexity/Google AI, **permite** los bots de *AI search / RAG*.
 3. **Google Search Console:** verifica `prodmvxii.com` y sube `https://prodmvxii.com/sitemap.xml`. Pega el token en `verification.google` de `layout.tsx`.
 4. **Bing Webmaster Tools:** igual que GSC (alimenta también a ChatGPT/Copilot).
+5. **GA Realtime:** abre GA4 → Informes → Tiempo real y navega el sitio para confirmar que llegan eventos.
+6. **🔐 SEGURIDAD:** el remote de git tiene un **token de GitHub (PAT) embebido en la URL** — rótalo en GitHub → Settings → Developer settings → Tokens, y reconfigura el remote con `git remote set-url`.
 
 ---
 
