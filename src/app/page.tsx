@@ -5,6 +5,7 @@ import Hero from "@/components/Hero";
 import BeatGrid from "@/components/BeatGrid";
 import LazySection from "@/components/LazySection";
 import StructuredData from "@/components/StructuredData";
+import PlayerProvider from "@/components/player/PlayerProvider";
 import FaqSection, { FAQ_ITEMS } from "@/components/FaqSection";
 import { licensesProductLd, faqPageLd } from "@/lib/seo";
 import { getBeats } from "@/lib/beats";
@@ -38,38 +39,44 @@ export default async function Home() {
       {/* ── Above fold — always eager ─────────────────────────── */}
       <Navigation />
       <Hero />
-      {/* Futuristic Google Drive folder explorer — right below the hero/portada */}
-      <DriveExplorer initialListing={driveListing} />
-      <BeatGrid initialBeats={initialBeats.beats as unknown as Beat[]} initialMode={initialBeats.mode} />
 
-      {/* ── Below fold — lazy-mounted + code-split ────────────── */}
-      <LazySection placeholder="380px" rootMargin="600px 0px">
-        <SocialHero />
-      </LazySection>
+      {/* PlayerProvider owns the single bottom audio player + WhatsApp float, so
+          the catalog (BeatGrid) and the Drive folder (DriveExplorer) play through
+          the exact same player. */}
+      <PlayerProvider>
+        {/* Futuristic Google Drive folder explorer — right below the hero/portada */}
+        <DriveExplorer initialListing={driveListing} />
+        <BeatGrid initialBeats={initialBeats.beats as unknown as Beat[]} initialMode={initialBeats.mode} />
 
-      <LazySection placeholder="320px" rootMargin="600px 0px">
-        <SpotifySection />
-      </LazySection>
+        {/* ── Below fold — lazy-mounted + code-split ────────────── */}
+        <LazySection placeholder="380px" rootMargin="600px 0px">
+          <SocialHero />
+        </LazySection>
 
-      {/* Licenses rendered eagerly — pricing/keyword text + internal links ship
-          in the server HTML (matches the Product/Offer JSON-LD). */}
-      <Licenses />
+        <LazySection placeholder="320px" rootMargin="600px 0px">
+          <SpotifySection />
+        </LazySection>
 
-      {/* FAQ is rendered eagerly (not lazy-gated) so its answers ship in the
-          server HTML — required for rich results + AI/GEO citation. */}
-      <FaqSection />
+        {/* Licenses rendered eagerly — pricing/keyword text + internal links ship
+            in the server HTML (matches the Product/Offer JSON-LD). */}
+        <Licenses />
 
-      <LazySection placeholder="560px" rootMargin="700px 0px">
-        <ContactForm />
-      </LazySection>
+        {/* FAQ is rendered eagerly (not lazy-gated) so its answers ship in the
+            server HTML — required for rich results + AI/GEO citation. */}
+        <FaqSection />
 
-      <LazySection placeholder="440px" rootMargin="600px 0px">
-        <SocialLinks />
-      </LazySection>
+        <LazySection placeholder="560px" rootMargin="700px 0px">
+          <ContactForm />
+        </LazySection>
 
-      {/* Footer rendered eagerly — sitewide internal links + NAP (contact) must
-          be crawlable in the server HTML. */}
-      <Footer />
+        <LazySection placeholder="440px" rootMargin="600px 0px">
+          <SocialLinks />
+        </LazySection>
+
+        {/* Footer rendered eagerly — sitewide internal links + NAP (contact) must
+            be crawlable in the server HTML. */}
+        <Footer />
+      </PlayerProvider>
     </div>
   );
 }

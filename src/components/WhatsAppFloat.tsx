@@ -25,7 +25,9 @@ export default function WhatsAppFloat({ playerActive = false }: { playerActive?:
       style={{
         position: "fixed",
         right: "24px",
-        bottom: playerActive ? "112px" : "24px",
+        // Sit clearly ABOVE the bottom player (~122px tall) so it never overlaps
+        // the preview controls; drop back down when no player is shown.
+        bottom: playerActive ? "138px" : "24px",
         zIndex: 250,
         width: "58px",
         height: "58px",
