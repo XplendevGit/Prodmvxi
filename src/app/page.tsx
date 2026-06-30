@@ -1,5 +1,6 @@
 import dynamic from "next/dynamic";
 import Navigation from "@/components/Navigation";
+import DriveExplorer from "@/components/DriveExplorer";
 import Hero from "@/components/Hero";
 import BeatGrid from "@/components/BeatGrid";
 import LazySection from "@/components/LazySection";
@@ -25,6 +26,8 @@ export default function Home() {
 
       {/* ── Above fold — always eager ─────────────────────────── */}
       <Navigation />
+      {/* First section: futuristic Google Drive folder explorer */}
+      <DriveExplorer />
       <Hero />
       <BeatGrid />
 

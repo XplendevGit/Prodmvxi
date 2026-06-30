@@ -16,6 +16,7 @@ export default function Navigation() {
   }, []);
 
   const navLinks = [
+    { label: "Carpeta", href: "#drive" },
     { label: "Beats", href: "#beats" },
     { label: "Licencias", href: "#licencias" },
   ];
