@@ -38,12 +38,14 @@ export const metadata: Metadata = {
     title: "Prod. Mvxii | Comprar Beats de Trap, Reggaetón y Drill",
     description:
       "Beats e instrumentales urbanos listos para grabar. Type beats de trap, reggaetón, drill y afrobeat por Prod. Mvxii.",
+    images: [{ url: "/Logo_Maxi.jpeg", alt: "Prod. Mvxii — Beats Profesionales" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Prod. Mvxii | Comprar Beats Online",
     description:
       "Beats e instrumentales de trap, reggaetón, drill y afrobeat por Prod. Mvxii. Type beats listos para grabar.",
+    images: ["/Logo_Maxi.jpeg"],
   },
   // To verify in Google Search Console, add the token here:
   // verification: { google: "TOKEN_DE_SEARCH_CONSOLE" },

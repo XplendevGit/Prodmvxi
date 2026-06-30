@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "edge";
+// NOTE: runs on the Node.js runtime (default). OpenNext/Cloudflare does not
+// support inline `runtime = "edge"` route handlers — and this route only uses
+// fetch + req.json(), which work fine on the Workers Node runtime.
 
 const TO_EMAIL = "prodmvxi@gmail.com";
 // Brevo (Sendinblue) transactional email API — free 300/day, no domain needed
