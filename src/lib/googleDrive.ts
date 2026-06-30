@@ -219,3 +219,23 @@ export function getDemoListing(folderId: string): DriveListing {
   const node = DEMO[key];
   return { mode: "demo", folderId: key, folderName: node.name, items: node.items };
 }
+
+/**
+ * Resolve a folder listing (real Drive when a token is configured, else demo).
+ * Shared by the /api/drive route and the server-rendered DriveExplorer so the
+ * root folder ships in the HTML (works in in-app browsers + SEO).
+ */
+export async function getDriveListing(folderId: string): Promise<DriveListing> {
+  const id = folderId || DRIVE_ROOT_FOLDER_ID;
+  const accessToken = await getDriveAccessToken();
+  if (accessToken) {
+    const [items, name] = await Promise.all([
+      listDriveFolder(accessToken, id),
+      getDriveFolderName(accessToken, id),
+    ]);
+    if (name !== null || items.length > 0) {
+      return { mode: "drive", folderId: id, folderName: name || "BEATS", items };
+    }
+  }
+  return getDemoListing(id);
+}

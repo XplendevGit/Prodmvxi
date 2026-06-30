@@ -7,6 +7,9 @@ import LazySection from "@/components/LazySection";
 import StructuredData from "@/components/StructuredData";
 import FaqSection, { FAQ_ITEMS } from "@/components/FaqSection";
 import { licensesProductLd, faqPageLd } from "@/lib/seo";
+import { getBeats } from "@/lib/beats";
+import { getDriveListing, DRIVE_ROOT_FOLDER_ID } from "@/lib/googleDrive";
+import type { Beat } from "@/lib/beatFilters";
 
 // ── Below-fold components ─────────────────────────────────────────────────────
 // next/dynamic splits these into separate JS chunks that only download when
@@ -18,7 +21,15 @@ const ContactForm    = dynamic(() => import("@/components/ContactForm"));
 const SocialLinks    = dynamic(() => import("@/components/SocialLinks"));
 const Footer         = dynamic(() => import("@/components/Footer"));
 
-export default function Home() {
+export default async function Home() {
+  // Server-fetch the initial data so the catalog + Drive folder ship in the HTML
+  // (renders instantly in any browser — including in-app browsers like Instagram —
+  // and is crawlable for SEO). The client components then progressively enhance.
+  const [initialBeats, driveListing] = await Promise.all([
+    getBeats({ page: 0, size: 30 }),
+    getDriveListing(DRIVE_ROOT_FOLDER_ID),
+  ]);
+
   return (
     <div style={{ background: "#050508", minHeight: "100vh" }}>
       {/* Home structured data: beat-licensing product + FAQ (rich results + GEO) */}
@@ -28,8 +39,8 @@ export default function Home() {
       <Navigation />
       <Hero />
       {/* Futuristic Google Drive folder explorer — right below the hero/portada */}
-      <DriveExplorer />
-      <BeatGrid />
+      <DriveExplorer initialListing={driveListing} />
+      <BeatGrid initialBeats={initialBeats.beats as unknown as Beat[]} initialMode={initialBeats.mode} />
 
       {/* ── Below fold — lazy-mounted + code-split ────────────── */}
       <LazySection placeholder="380px" rootMargin="600px 0px">

@@ -37,14 +37,20 @@ function SkeletonCard() {
   );
 }
 
-export default function BeatGrid() {
-  const [beats, setBeats] = useState<Beat[]>([]);
-  const [loading, setLoading] = useState(true);
+interface BeatGridProps {
+  /** Server-rendered teaser beats (in the HTML — works in in-app browsers + SEO). */
+  initialBeats?: Beat[];
+  initialMode?: "beatstars" | "drive" | "demo";
+}
+
+export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridProps) {
+  const [beats, setBeats] = useState<Beat[]>(initialBeats);
+  const [loading, setLoading] = useState(initialBeats.length === 0);
   const [error, setError] = useState<string | null>(null);
   const [currentBeat, setCurrentBeat] = useState<Beat | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isDemoMode, setIsDemoMode] = useState(false);
-  const [isBeatstarsMode, setIsBeatstarsMode] = useState(false);
+  const [isDemoMode, setIsDemoMode] = useState(initialMode === "demo");
+  const [isBeatstarsMode, setIsBeatstarsMode] = useState(initialMode === "beatstars");
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -57,27 +63,33 @@ export default function BeatGrid() {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  // Load the full catalog once (cached) so we can split Old School vs general
+  // Upgrade the SSR teaser to the FULL catalog (for Old School split + counts).
+  // If this fails (e.g. an in-app browser blocks the fetch) the SSR beats stay.
   useEffect(() => {
     fetch(`/api/beats?all=1`)
       .then((r) => r.json())
       .then((data: BeatsResponse) => {
         const list = data.beats ?? [];
-        setBeats(list);
-        setIsDemoMode(data.mode === "demo");
-        setIsBeatstarsMode(data.mode === "beatstars");
         if (list.length > 0) {
-          const rndIdx = Math.floor(Math.random() * Math.min(list.length, 8));
-          setCurrentBeat(list[rndIdx]);
-          setIsPlaying(false);
+          setBeats(list);
+          setIsDemoMode(data.mode === "demo");
+          setIsBeatstarsMode(data.mode === "beatstars");
         }
         setLoading(false);
       })
       .catch(() => {
-        setError("No se pudieron cargar los beats.");
         setLoading(false);
+        if (initialBeats.length === 0) setError("No se pudieron cargar los beats.");
       });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Pick a featured beat once we have data (client-only → no hydration mismatch).
+  useEffect(() => {
+    if (!currentBeat && beats.length > 0) {
+      setCurrentBeat(beats[Math.floor(Math.random() * Math.min(beats.length, 8))]);
+    }
+  }, [beats, currentBeat]);
 
   const oldSchool = useMemo(() => beats.filter((b) => beatMatchesStyle(b, "Old School")), [beats]);
   const general = beats;

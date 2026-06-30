@@ -33,19 +33,25 @@ function formatSize(bytes: number | null): string {
   return mb >= 1 ? `${mb.toFixed(1)} MB` : `${Math.round(bytes / 1000)} KB`;
 }
 
-export default function DriveExplorer() {
-  const [path, setPath] = useState<Crumb[]>([{ id: "", name: "Beats" }]);
-  const [items, setItems] = useState<DriveItem[]>([]);
-  const [mode, setMode] = useState<"drive" | "demo" | null>(null);
-  const [loading, setLoading] = useState(true);
+export default function DriveExplorer({ initialListing }: { initialListing?: DriveListing }) {
+  const [path, setPath] = useState<Crumb[]>([{ id: "", name: initialListing?.folderName ?? "Beats" }]);
+  const [items, setItems] = useState<DriveItem[]>(initialListing?.items ?? []);
+  const [mode, setMode] = useState<"drive" | "demo" | null>(initialListing?.mode ?? null);
+  const [loading, setLoading] = useState(!initialListing);
   const [error, setError] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement>(null);
+  const firstRun = useRef(true);
   const current = path[path.length - 1];
 
-  // ── Fetch current folder ───────────────────────────────────────────────────
+  // ── Fetch on navigation. The root folder ships from the server (initialListing)
+  //    so the catalog renders instantly even in in-app browsers (no client fetch). ─
   useEffect(() => {
+    const isFirst = firstRun.current;
+    firstRun.current = false;
+    if (isFirst && initialListing) return; // root already server-rendered
+
     let cancelled = false;
     setLoading(true);
     setError(false);
@@ -56,10 +62,6 @@ export default function DriveExplorer() {
         if (cancelled) return;
         setItems(data.items || []);
         setMode(data.mode);
-        // Sync the crumb name with Drive's real folder name (root only)
-        if (path.length === 1 && data.folderName && data.folderName !== current.name) {
-          setPath([{ id: "", name: data.folderName }]);
-        }
       })
       .catch(() => !cancelled && setError(true))
       .finally(() => !cancelled && setLoading(false));
