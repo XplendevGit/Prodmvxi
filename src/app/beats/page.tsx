@@ -17,6 +17,7 @@ export const metadata: Metadata = {
     title: "Catálogo de Beats — Comprar Type Beats | Prod. Mvxii",
     description:
       "Instrumentales de trap, reggaetón y drill. Filtra por género, artista y BPM.",
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Catálogo de beats de Prod. Mvxii" }],
   },
 };
 

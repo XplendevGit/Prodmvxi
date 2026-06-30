@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import StructuredData from "@/components/StructuredData";
@@ -38,17 +38,22 @@ export const metadata: Metadata = {
     title: "Prod. Mvxii | Comprar Beats de Trap, Reggaetón y Drill",
     description:
       "Beats e instrumentales urbanos listos para grabar. Type beats de trap, reggaetón, drill y afrobeat por Prod. Mvxii.",
-    images: [{ url: "/Logo_Maxi.jpeg", alt: "Prod. Mvxii — Beats Profesionales" }],
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: "Prod. Mvxii — Beats de Trap, Reggaetón, Drill y Afrobeat" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Prod. Mvxii | Comprar Beats Online",
     description:
       "Beats e instrumentales de trap, reggaetón, drill y afrobeat por Prod. Mvxii. Type beats listos para grabar.",
-    images: ["/Logo_Maxi.jpeg"],
+    images: ["/og.png"],
   },
   // To verify in Google Search Console, add the token here:
   // verification: { google: "TOKEN_DE_SEARCH_CONSOLE" },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#8B5CF6",
+  colorScheme: "dark",
 };
 
 export default function RootLayout({
