@@ -91,7 +91,6 @@ export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridPro
   }, [beats]);
 
   const oldSchool = useMemo(() => beats.filter((b) => beatMatchesStyle(b, "Old School")), [beats]);
-  const general = beats;
 
   const handlePlay = (beat: Beat) => player.play(beat, beats);
 
@@ -225,9 +224,9 @@ export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridPro
         <div style={{ textAlign: "center", padding: "40px", color: "rgba(241,245,249,0.5)", fontSize: "16px" }}>{error}</div>
       )}
 
-      {/* ===== OLD SCHOOL section (separated) ===== */}
+      {/* ===== OLD SCHOOL section ===== */}
       {(loading || oldSchool.length > 0) && (
-        <div style={{ marginBottom: "72px" }}>
+        <div style={{ marginBottom: "8px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px", flexWrap: "wrap" }}>
             <span
               style={{
@@ -251,36 +250,13 @@ export default function BeatGrid({ initialBeats = [], initialMode }: BeatGridPro
             </span>
           </div>
           {renderGrid(oldSchool)}
-          {!loading && oldSchool.length > TEASER_SIZE && (
-            <VerTodos href={`/beats?style=${encodeURIComponent("Old School")}`} label="Ver todos los Old School" />
-          )}
         </div>
       )}
 
-      {/* ===== General catalog teaser ===== */}
-      <div>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "24px" }}>
-          <span
-            style={{
-              padding: "8px 18px",
-              borderRadius: "50px",
-              background: "rgba(139,92,246,0.12)",
-              border: "1px solid rgba(139,92,246,0.4)",
-              color: "#A855F7",
-              fontSize: "13px",
-              fontWeight: 800,
-              letterSpacing: "2px",
-            }}
-          >
-            TODOS LOS BEATS
-          </span>
-          <span style={{ color: "rgba(241,245,249,0.45)", fontSize: "13px" }}>
-            {!loading && `${general.length} disponibles`}
-          </span>
-        </div>
-        {renderGrid(general)}
-        {!loading && general.length > 0 && <VerTodos href="/beats" label="Ver todos los beats" />}
-      </div>
+      {/* Single CTA → full catalog + search (optimizes vertical space) */}
+      {!loading && beats.length > 0 && (
+        <VerTodos href="/beats" label="Ver todas las canciones" />
+      )}
     </section>
   );
 }

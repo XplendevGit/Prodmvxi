@@ -4,6 +4,8 @@
 // the UI can mirror Drive's structure exactly via lazy navigation.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { cacheGet, cacheSet } from "@/lib/cache";
+
 export const DRIVE_ROOT_FOLDER_ID =
   process.env.GOOGLE_DRIVE_FOLDER_ID || "1e9JZ8FmDP6ubVeBzMlalpAbHcTTiYBob";
 
@@ -52,6 +54,10 @@ export async function getDriveAccessToken(): Promise<string | null> {
     refreshToken !== "tu_refresh_token_aqui";
   if (!clientId || !clientSecret || !valid) return null;
 
+  // Access tokens are valid ~1h — cache for 50 min to avoid re-exchanging every request.
+  const cached = cacheGet<string>("drive:token");
+  if (cached) return cached;
+
   try {
     const res = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
@@ -65,7 +71,9 @@ export async function getDriveAccessToken(): Promise<string | null> {
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { access_token?: string };
-    return data.access_token || null;
+    const token = data.access_token || null;
+    if (token) cacheSet("drive:token", token, 50 * 60 * 1000);
+    return token;
   } catch {
     return null;
   }
@@ -227,15 +235,22 @@ export function getDemoListing(folderId: string): DriveListing {
  */
 export async function getDriveListing(folderId: string): Promise<DriveListing> {
   const id = folderId || DRIVE_ROOT_FOLDER_ID;
+  const key = `drive:list:${id}`;
+  const cached = cacheGet<DriveListing>(key);
+  if (cached) return cached;
+
   const accessToken = await getDriveAccessToken();
+  let listing: DriveListing = getDemoListing(id);
   if (accessToken) {
     const [items, name] = await Promise.all([
       listDriveFolder(accessToken, id),
       getDriveFolderName(accessToken, id),
     ]);
     if (name !== null || items.length > 0) {
-      return { mode: "drive", folderId: id, folderName: name || "BEATS", items };
+      listing = { mode: "drive", folderId: id, folderName: name || "BEATS", items };
     }
   }
-  return getDemoListing(id);
+  // Real listings cached 2 min; demo fallback only 30s so it recovers quickly.
+  cacheSet(key, listing, listing.mode === "drive" ? 120_000 : 30_000);
+  return listing;
 }

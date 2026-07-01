@@ -5,6 +5,7 @@
 // Source priority: Google Drive (flat audio) → BeatStars public API → demo.
 // ─────────────────────────────────────────────────────────────────────────────
 import { DRIVE_ROOT_FOLDER_ID, getDriveAccessToken } from "@/lib/googleDrive";
+import { cacheGet, cacheSet } from "@/lib/cache";
 
 const BEATSTARS_USER = "prodmvxii";
 
@@ -149,11 +150,15 @@ function mapTrack(t: BsTrack) {
 }
 
 async function getMemberId(): Promise<string | null> {
+  const cached = cacheGet<string>("bs:memberId");
+  if (cached) return cached;
   const profile = await bsGraphql<{ profileByUsername: { memberId: string } | null }>(
     `query($username:String!){profileByUsername(username:$username){memberId}}`,
     { username: BEATSTARS_USER }
   );
-  return profile?.profileByUsername?.memberId || null;
+  const id = profile?.profileByUsername?.memberId || null;
+  if (id) cacheSet("bs:memberId", id, 60 * 60 * 1000);
+  return id;
 }
 
 async function beatstarsAll(): Promise<BeatsResult | null> {
@@ -184,10 +189,21 @@ async function beatstarsPage(page: number, size: number): Promise<BeatsResult | 
 
 // ── Public entry point ───────────────────────────────────────────────────────
 export async function getBeats(opts: { all?: boolean; page?: number; size?: number } = {}): Promise<BeatsResult> {
-  const { all = false } = opts;
+  const all = opts.all ?? false;
   const page = Math.max(0, opts.page ?? 0);
   const size = Math.min(100, Math.max(1, opts.size ?? 12));
 
+  const key = all ? "beats:all" : `beats:${page}:${size}`;
+  const cached = cacheGet<BeatsResult>(key);
+  if (cached) return cached;
+
+  const result = await computeBeats(all, page, size);
+  // Real catalog cached 5 min; demo fallback 30s so it recovers quickly.
+  cacheSet(key, result, result.mode === "demo" ? 30_000 : 300_000);
+  return result;
+}
+
+async function computeBeats(all: boolean, page: number, size: number): Promise<BeatsResult> {
   // 1. Google Drive (flat audio in the root folder) — only if a token is configured.
   const accessToken = await getDriveAccessToken();
   if (accessToken) {
