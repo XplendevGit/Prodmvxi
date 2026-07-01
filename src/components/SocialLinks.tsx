@@ -86,8 +86,8 @@ const SOCIALS: SocialPlatform[] = [
   },
   {
     name: "TikTok",
-    handle: "@prodmvxii",
-    url: "https://www.tiktok.com/@prodmvxii",
+    handle: "@prodmvxii_",
+    url: "https://www.tiktok.com/@prodmvxii_",
     color: "#69C9D0",
     glowColor: "#EE1D52",
     icon: <TikTokIcon />,

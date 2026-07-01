@@ -34,7 +34,7 @@ function WhatsAppIcon() {
 
 const SOCIALS = [
   { icon: <InstagramIcon />, href: "https://www.instagram.com/prodmvxii", label: "Instagram", color: "#E1306C" },
-  { icon: <TikTokIcon />, href: "https://www.tiktok.com/@prodmvxii", label: "TikTok", color: "#69C9D0" },
+  { icon: <TikTokIcon />, href: "https://www.tiktok.com/@prodmvxii_", label: "TikTok", color: "#69C9D0" },
   { icon: <YouTubeIcon />, href: "https://www.youtube.com/@prodmvxii", label: "YouTube", color: "#FF0000" },
   { icon: <WhatsAppIcon />, href: "https://wa.me/56932907119?text=" + encodeURIComponent("¡Hola Prod. Mvxii! 👋 Quiero info sobre tus beats."), label: "WhatsApp", color: "#25D366" },
 ];

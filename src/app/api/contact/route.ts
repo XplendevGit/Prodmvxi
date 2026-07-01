@@ -343,7 +343,7 @@ function buildHtml(data: {
                            text-decoration:none;background-color:#1a0d2e;
                            border:1px solid #4c1d95;padding:6px 14px;
                            border-radius:50px;margin:0 4px;">Instagram</a>
-                  <a href="https://tiktok.com/@prodmvxii"
+                  <a href="https://www.tiktok.com/@prodmvxii_"
                     style="display:inline-block;color:#A855F7;font-family:Arial,sans-serif;
                            font-size:11px;font-weight:700;letter-spacing:1px;
                            text-decoration:none;background-color:#1a0d2e;

@@ -31,7 +31,7 @@ export const BUSINESS = {
   social: {
     instagram: "https://www.instagram.com/prodmvxii",
     youtube: "https://www.youtube.com/@prodmvxii",
-    tiktok: "https://www.tiktok.com/@prodmvxii",
+    tiktok: "https://www.tiktok.com/@prodmvxii_",
     beatstars: "https://www.beatstars.com/prodmvxii",
   },
 } as const;
